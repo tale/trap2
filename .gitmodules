@@ -1,0 +1,4 @@
+[submodule "subprojects/vterm"]
+	path = subprojects/vterm
+	url = https://github.com/neovim/libvterm.git
+	branch = mirror
