@@ -1,1 +1,1 @@
-subprojects/* linguist-vendored
+subprojects/** linguist-vendored
