@@ -60,28 +60,26 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 }
 
 void render_term(term_t *state) {
-	// printf("dirty: %d\n", state->dirty);
-
 	if (state->dirty) {
+		GLuint display_list = glGenLists(1);
+		glNewList(display_list, GL_COMPILE);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		int x_pos = 0;
-		int y_pos = 0;
-
-		// printf("rows: %d\n", state->config.rows);
-		// printf("cols: %d\n", state->config.cols);
-
+		int x_offset = 0;
 		for (int y = 0; y < state->config->rows; y++) {
 			for (int x = 0; x < state->config->cols; x++) {
-				render_cell(state, x, y, &x_pos);
+				render_cell(state, x, y, &x_offset);
 			}
 
-			x_pos = 0;
+			x_offset = 0;
 		}
 
 		// Render cursor block with pure white bar skulley
 		int font_width = state->font.face->size->metrics.max_advance >> 6;
-		int font_height = state->font.face->size->metrics.height >> 6;
+		int ascent = state->font.face->size->metrics.ascender >> 6;
+		int descent = state->font.face->size->metrics.descender >> 6;
+		int font_height = ascent - descent;
 
 		coord_t cursor = {
 			.x = state->cursor.x * font_width,
@@ -97,9 +95,7 @@ void render_term(term_t *state) {
 
 		glGenTextures(1, &texture_handle);
 		glBindTexture(GL_TEXTURE_2D, texture_handle);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-					 color);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, color);
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0, 0);
@@ -110,7 +106,9 @@ void render_term(term_t *state) {
 		glVertex2f(cursor.x + cursor.width, cursor.y + cursor.height);
 		glTexCoord2f(0, 1);
 		glVertex2f(cursor.x, cursor.y + cursor.height);
-
 		glEnd();
+
+		glEndList();
+		glCallList(display_list);
 	}
 }
