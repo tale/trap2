@@ -12,6 +12,7 @@ int main(void) {
 		.argv = argv,
 		.cols = 80,
 		.rows = 24,
+		.dpi = 1,
 	};
 
 	if (!init_term(&state, &config)) {

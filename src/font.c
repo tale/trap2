@@ -20,8 +20,6 @@ int init_font(font_t *font, char *font_file, float size) {
 		return 0;
 	}
 
-	// Get the display DPI scale
-
 	// Load unnaturally large font in order to get the largest possible glyph
 	error = FT_Set_Char_Size(font->face, 0, (int)(size * 64), 300, 300);
 	if (error) {

@@ -18,6 +18,7 @@ void resize_term(term_t *state, int width, int height) {
 
 	state->config->width = width;
 	state->config->height = height;
+	state->config->dpi = dpi;
 
 	int ascent = state->font.face->size->metrics.ascender >> 6;
 	int descent = state->font.face->size->metrics.descender >> 6;
@@ -25,13 +26,15 @@ void resize_term(term_t *state, int width, int height) {
 	int mono_width = state->font.face->glyph->advance.x >> 6;
 	int mono_height = ascent - descent;
 
-	int rows = (width / mono_width) * dpi;
-	int cols = (height / mono_height);
+	int cols = (width / mono_width) * dpi;
+	int rows = (height / mono_height) * dpi;
+
+	printf("Resizing to %dx%d\n", cols, rows);
 
 	if (cols != state->config->rows || rows != state->config->cols) {
 
-		state->config->rows = cols;
-		state->config->cols = rows;
+		state->config->rows = rows;
+		state->config->cols = cols;
 		vterm_set_size(state->vterm, rows, cols);
 		// vterm_screen_flush_damage(state->vterm_screen);
 

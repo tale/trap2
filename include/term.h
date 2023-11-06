@@ -20,6 +20,7 @@ typedef struct {
 
 	int rows;
 	int cols;
+	int dpi;
 } config_t;
 
 typedef struct {

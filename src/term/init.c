@@ -74,12 +74,6 @@ int init_term(term_t *state, config_t *config) {
 		return 0;
 	}
 
-	// TODO: Fix config not being passable?
-	if (!init_font(&state->font, "iosevka.ttf", 7)) {
-		fprintf(stderr, "Failed to initialize font\n");
-		return 0;
-	}
-
 	state->window = SDL_CreateWindow(
 		"trap2 Terminal",
 		SDL_WINDOWPOS_UNDEFINED,
@@ -146,15 +140,24 @@ int init_term(term_t *state, config_t *config) {
 
 	// Make the OpenGL coordinate system orthagnoal from top-left
 	// This is identical to the non-accelerated SDL renderer coordinates
-	int win_width, win_height;
-	SDL_GL_GetDrawableSize(state->window, &win_width, &win_height);
+	int draw_width, draw_height, win_width, win_height;
+	SDL_GL_GetDrawableSize(state->window, &draw_width, &draw_height);
+	SDL_GetWindowSize(state->window, &win_width, &win_height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, win_width, win_height, 0, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 
+	state->config->dpi = draw_width / win_width;
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int font_size = 15 / state->config->dpi;
+	if (!init_font(&state->font, state->config->font, font_size)) {
+		fprintf(stderr, "Failed to initialize font\n");
+		return 0;
+	}
 
 	state->vterm = vterm_new(state->config->rows, state->config->cols);
 	if (state->vterm == NULL) {
@@ -191,6 +194,7 @@ int init_term(term_t *state, config_t *config) {
 	// If running in child
 	if (state->child_pty == 0) {
 		setenv("TERM", "xterm-256color", 1);
+		setenv("COLORTERM", "truecolor", 1);
 		execv(config->shell, config->argv);
 	} else {
 		// Block the sigaction for SIGCHLD
