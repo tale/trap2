@@ -14,7 +14,8 @@ sources = [
   'src/term/init.c',
   'src/term/destroy.c',
   'src/term/handle.c',
-  'src/term/render.c'
+  'src/term/render.c',
+  'src/term/resize.c'
 ]
 
 run_command('./configure.sh', check: true)

@@ -4,6 +4,7 @@
 #include "font.h"
 #include <inttypes.h>
 #include <signal.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <util.h>
 #include <vterm.h>
@@ -51,4 +52,5 @@ static int child_state;
 int init_term(term_t *state, config_t *config);
 void destroy_term(term_t *state);
 void render_term(term_t *state);
+void resize_term(term_t *state, int width, int height);
 int handle_term(term_t *state);

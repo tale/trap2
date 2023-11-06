@@ -37,10 +37,7 @@ int handle_term(term_t *state) {
 		case SDL_WINDOWEVENT:
 			switch (event.window.event) {
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
-				fprintf(stderr, "resize_term: %d %d\n", event.window.data1, event.window.data2);
-
-				// TODO: Implement term_resize
-				// resize_term(state, event.window.data1, event.window.data2);
+				resize_term(state, event.window.data1, event.window.data2);
 				break;
 			}
 
