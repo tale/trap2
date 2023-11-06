@@ -15,12 +15,12 @@ int handle_term(term_t *state) {
 	timeout.tv_usec = 50000;
 
 	if (select(state->child_fd + 1, &readfds, NULL, NULL, &timeout) > 0) {
-		char line[256];
+		size_t page_size = getpagesize();
+		char line[page_size];
 		int n;
 
 		if ((n = read(state->child_fd, line, sizeof(line))) > 0) {
 			vterm_input_write(state->vterm, line, n);
-			printf("%s\n", line);
 			state->dirty = true;
 		}
 	}
