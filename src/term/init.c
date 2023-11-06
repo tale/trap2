@@ -190,6 +190,7 @@ int init_term(term_t *state, config_t *config) {
 
 	// If running in child
 	if (state->child_pty == 0) {
+		setenv("TERM", "xterm-256color", 1);
 		execv(config->shell, config->argv);
 	} else {
 		// Block the sigaction for SIGCHLD
