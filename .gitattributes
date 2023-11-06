@@ -1,1 +1,2 @@
 subprojects/** linguist-vendored
+configure.sh linguist-vendored
