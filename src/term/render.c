@@ -24,25 +24,26 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	vterm_state_convert_color_to_rgb(state->vterm_state, &cell.fg);
 	vterm_state_convert_color_to_rgb(state->vterm_state, &cell.bg);
 
-	// fprintf(stdout, "%s\n", cell.chars);
+	uint8_t fg_red = cell.fg.rgb.red;
+	uint8_t fg_green = cell.fg.rgb.green;
+	uint8_t fg_blue = cell.fg.rgb.blue;
 
-	// TODO: Color support
+	uint8_t bg_red = cell.bg.rgb.red;
+	uint8_t bg_green = cell.bg.rgb.green;
+	uint8_t bg_blue = cell.bg.rgb.blue;
 
 	if (cell.attrs.reverse) {
-		// SDL_Rect rect = {cursor.x, cursor.y + 4, state->font.max_width, state->font.max_height};
-		// SDL_SetRenderDrawColor(state->renderer, color.r, color.g, color.b, color.a);
-		// color.r = ~color.r;
-		// color.g = ~color.g;
-		// color.b = ~color.b;
-		//
-		// SDL_RenderFillRect(state->renderer, &rect);
+		fg_red = ~fg_red;
+		fg_green = ~fg_green;
+		fg_blue = ~fg_blue;
+
+		bg_red = ~bg_red;
+		bg_green = ~bg_green;
+		bg_blue = ~bg_blue;
 	}
 
 	if (cell.attrs.bold) {
 		// TODO: Bold
-		// color.r = color.r * 1.5;
-		// color.g = color.g * 1.5;
-		// color.b = color.b * 1.5;
 	}
 
 	// TODO: Other attributes
@@ -55,8 +56,22 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 		return;
 	}
 
+	color_t color = {
+		.fg = {
+			.r = fg_red,
+			.g = fg_green,
+			.b = fg_blue,
+		},
+
+		.bg = {
+			.r = bg_red,
+			.g = bg_green,
+			.b = bg_blue,
+		},
+	};
+
 	*offset += (state->font.face->glyph->advance.x >> 6);
-	render_glyph(&state->font, &bitmap, &coord);
+	render_glyph(&state->font, &bitmap, &coord, &color);
 }
 
 void render_term(term_t *state) {
@@ -87,27 +102,21 @@ void render_term(term_t *state) {
 			.width = font_width,
 			.height = font_height};
 
-		// print the cursor.x and y
-		// printf("%d %d\n", state->cursor.x, state->cursor.y);
-
-		GLubyte color[4] = {255, 255, 255, 255};
-		GLuint texture_handle;
-
-		glGenTextures(1, &texture_handle);
-		glBindTexture(GL_TEXTURE_2D, texture_handle);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, color);
-
 		glBegin(GL_QUADS);
+
 		glTexCoord2f(0, 0);
 		glVertex2f(cursor.x, cursor.y);
+
 		glTexCoord2f(1, 0);
 		glVertex2f(cursor.x + cursor.width, cursor.y);
+
 		glTexCoord2f(1, 1);
 		glVertex2f(cursor.x + cursor.width, cursor.y + cursor.height);
+
 		glTexCoord2f(0, 1);
 		glVertex2f(cursor.x, cursor.y + cursor.height);
-		glEnd();
 
+		glEnd();
 		glEndList();
 		glCallList(display_list);
 	}

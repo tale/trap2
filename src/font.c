@@ -53,7 +53,7 @@ int get_bitmap(FT_UInt32 char_code, FT_Bitmap *bitmap, font_t *font) {
 	return 0;
 }
 
-int render_glyph(font_t *font, FT_Bitmap *bitmap, coord_t *coord) {
+int render_glyph(font_t *font, FT_Bitmap *bitmap, coord_t *coord, color_t *color) {
 	// All the operations reference a diagram on FreeType's website
 	// https://freetype.org/freetype2/docs/glyphs/glyph-metrics-3.svg
 	int glyph_height = font->face->glyph->metrics.height >> 6;
@@ -124,6 +124,8 @@ int render_glyph(font_t *font, FT_Bitmap *bitmap, coord_t *coord) {
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
+	glColor3ub(color->fg.r, color->fg.g, color->fg.b);
+
 	glBegin(GL_QUADS);
 
 	glTexCoord2d(0, 0); // Top-left of the texture
@@ -140,4 +142,7 @@ int render_glyph(font_t *font, FT_Bitmap *bitmap, coord_t *coord) {
 
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
+
+	// TODO: Support background colors
+	return 0;
 }
