@@ -1,4 +1,4 @@
-#1/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Replace glibtool with libtool in subprojects/vterm/Makefile
 sed -i '' -e 's/glibtool/libtool/g' subprojects/vterm/Makefile
