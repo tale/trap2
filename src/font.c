@@ -142,13 +142,13 @@ int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *col
 	point_t bottom_right = {coord->x + coord->width, coord->y + max_height};
 
 	// Step 1. Float the start over by the value of the X bearing
-	int horizontal_bearing = font->face->glyph->metrics.horiBearingX >> 6;
+	int horizontal_bearing = metrics.horiBearingX >> 6;
 	top_left.x += horizontal_bearing;
 	bottom_left.x += horizontal_bearing;
 
 	// Step 2. Align the character to the baseline
 	// The amount of height above the baseline is the Y bearing
-	int vertical_bearing = font->face->glyph->metrics.horiBearingY >> 6;
+	int vertical_bearing = metrics.horiBearingY >> 6;
 	int offset_from_top = ascent - vertical_bearing;
 
 	top_left.y += offset_from_top;
@@ -169,30 +169,23 @@ int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *col
 		bottom_right.y += below_baseline;
 	}
 
-	GLuint texture_handle;
+	// Step 4. Calculate the right side bearing in order to re-offset characters back
+	// The right side bearing is the advance value - the width - the left side bearing
+	int right_side_bearing = (metrics.horiAdvance >> 6) - (metrics.width >> 6) - horizontal_bearing;
+	top_right.x -= right_side_bearing;
+	bottom_right.x -= right_side_bearing;
 
-	glGenTextures(1, &texture_handle);
-	glBindTexture(GL_TEXTURE_2D, texture_handle);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	// Draw the background
+	glColor3ub(color->bg.r, color->bg.g, color->bg.b);
+	glBegin(GL_QUADS);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glVertex2i(coord->x, coord->y);
+	glVertex2i(coord->x + coord->width, coord->y);
+	glVertex2i(coord->x + coord->width, coord->y + max_height);
+	glVertex2i(coord->x, coord->y + max_height);
 
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		GL_RGB,
-		bitmap->width,
-		bitmap->rows,
-		0,
-		GL_LUMINANCE,
-		GL_UNSIGNED_BYTE,
-		bitmap->buffer);
+	glEnd();
 
-	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
 	glColor3ub(color->fg.r, color->fg.g, color->fg.b);
 
@@ -211,8 +204,7 @@ int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *col
 	glVertex2i(bottom_left.x, bottom_left.y);
 
 	glEnd();
-	glDisable(GL_TEXTURE_2D);
-
-	// TODO: Support background colors
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glColor3ub(0, 0, 0);
 	return 0;
 }
