@@ -2,13 +2,14 @@
 
 int main(void) {
 	term_t state;
-	char *argv[] = {"bash", "-l", NULL};
+	char *argv[] = {"zsh", "-l", NULL};
 
 	config_t config = {
 		.width = 800,
 		.height = 600,
 		.font = "iosevka.ttf",
-		.shell = "/bin/bash",
+		.font_size = 15,
+		.shell = "/etc/profiles/per-user/tale/bin/zsh",
 		.argv = argv,
 		.cols = 80,
 		.rows = 24,

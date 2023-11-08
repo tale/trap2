@@ -151,9 +151,10 @@ int init_term(term_t *state, config_t *config) {
 	state->config->dpi = draw_width / win_width;
 
 	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	int font_size = 15 / state->config->dpi;
+	int font_size = state->config->font_size / state->config->dpi;
 	if (!init_font(&state->font, state->config->font, font_size)) {
 		fprintf(stderr, "Failed to initialize font\n");
 		return 0;

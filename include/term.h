@@ -14,6 +14,7 @@ typedef struct {
 	char *shell;
 	char **argv;
 	char *font;
+	float font_size;
 
 	int width;
 	int height;
