@@ -10,6 +10,6 @@ void destroy_term(term_t *state) {
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 
-	SDL_DestroyWindow(state->window);
-	SDL_Quit();
+	glfwDestroyWindow(state->glfw_window);
+	glfwTerminate();
 }

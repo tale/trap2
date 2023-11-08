@@ -5,8 +5,8 @@ void resize_term(term_t *state, int width, int height) {
 	// Additionally we need to take display DPI scaling into calculation
 
 	int draw_width, draw_height, win_width, win_height;
-	SDL_GL_GetDrawableSize(state->window, &draw_width, &draw_height);
-	SDL_GetWindowSize(state->window, &win_width, &win_height);
+	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
+	glfwGetWindowSize(state->glfw_window, &win_width, &win_height);
 
 	int dpi = draw_width / win_width;
 
@@ -26,8 +26,8 @@ void resize_term(term_t *state, int width, int height) {
 	int mono_width = state->font.face->glyph->advance.x >> 6;
 	int mono_height = ascent - descent;
 
-	int cols = (width / mono_width) * dpi;
-	int rows = (height / mono_height) * dpi;
+	int cols = (width / mono_width);
+	int rows = (height / mono_height);
 
 	printf("Resizing to %dx%d\n", cols, rows);
 

@@ -1,11 +1,17 @@
 #include "term.h"
 
-void glfw_error_callback(int error, const char *description) {
-	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
+GLFWwindow *window;
 
 void sig_handler(int sig_type) {
 	child_state = 0;
+
+	// Reap the child process
+	int status;
+	waitpid(-1, &status, WNOHANG);
+
+	log_info("Child process terminated with status %d", status);
+	term_t *state = glfwGetWindowUserPointer(window);
+	vterm_input_write(state->vterm, "[Process terminated]\n", 21);
 }
 
 int damage(VTermRect rect, void *user) {
@@ -60,6 +66,42 @@ void vterm_output_callback(const char *bytes, size_t len, void *user) {
 	write(fd, bytes, len);
 }
 
+void glfw_error_callback(int error, const char *description) {
+	log_error("GLFW Error %d: %s", error, description);
+}
+
+void glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
+	term_t *state = glfwGetWindowUserPointer(window);
+	vterm_keyboard_unichar(state->vterm, codepoint, VTERM_MOD_NONE);
+}
+
+void glfw_resize_callback(GLFWwindow *window, int width, int height) {
+	term_t *state = glfwGetWindowUserPointer(window);
+	resize_term(state, width, height);
+}
+
+void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	term_t *state = glfwGetWindowUserPointer(window);
+
+	if (action != GLFW_PRESS && action != GLFW_REPEAT) {
+		return;
+	}
+
+	// Support Command + Q and Windows + Q to quit
+	if (action == GLFW_PRESS && key == GLFW_KEY_Q && mods & GLFW_MOD_SUPER) {
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+
+	if (action == GLFW_PRESS) {
+		handle_key(state, key, mods);
+	}
+}
+
+void glfw_focus_callback(GLFWwindow *window, int focused) {
+	term_t *state = glfwGetWindowUserPointer(window);
+	state->window_active = focused;
+}
+
 int init_term(term_t *state, config_t *config) {
 	if (config == NULL) {
 		fprintf(stderr, "Config is NULL\n");
@@ -68,64 +110,71 @@ int init_term(term_t *state, config_t *config) {
 
 	state->config = config;
 
-	if (SDL_Init(SDL_INIT_VIDEO)) {
-		fprintf(stderr, "Failed to initialize SDL\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
+	if (!glfwInit()) {
+		fprintf(stderr, "Failed to initialize GLFW\n");
 		return 0;
 	}
 
-	state->window = SDL_CreateWindow(
-		"trap2 Terminal",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
+	log_info("Loaded GLFW: %s", glfwGetVersionString());
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	if (mode == NULL) {
+		fprintf(stderr, "Failed to get video mode\n");
+		glfwTerminate();
+		return 0;
+	}
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_DEPTH_BITS, 24);
+	glfwWindowHint(GLFW_STENCIL_BITS, 8);
+	glfwWindowHint(GLFW_ALPHA_BITS, 8);
+	glfwWindowHint(GLFW_DOUBLEBUFFER, 1);
+	// glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GL_FRAMEBUFFER_SRGB, GLFW_TRUE);
+
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+	glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+	// glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+
+	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GLFW_TRUE);
+
+	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+
+	// Higher refresh rates allow overbuffered rendering
+	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate * 2);
+
+	state->glfw_window = glfwCreateWindow(
 		config->width,
 		config->height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+		"trap2 Terminal",
+		NULL,
+		NULL);
 
-	// Set our GL attributes before getting the context
-	// TODO: Switch to OpenGL 4 and use shaders instead of fixed pipeline
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-	SDL_DisplayMode mode;
-	if (SDL_GetCurrentDisplayMode(0, &mode) != 0) {
-		fprintf(stderr, "Failed to get display mode\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-
-		SDL_DestroyWindow(state->window);
-		SDL_Quit();
+	if (state->glfw_window == NULL) {
+		fprintf(stderr, "Failed to create GLFW window\n");
+		glfwTerminate();
 		return 0;
 	}
 
-	SDL_PixelFormat *format = SDL_AllocFormat(mode.format);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, format->BitsPerPixel);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, format->BitsPerPixel);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, format->BitsPerPixel);
+	// The sigaction needs this for printing
+	window = state->glfw_window;
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-	SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-	SDL_GL_SetSwapInterval(1);
+	glfwMakeContextCurrent(state->glfw_window);
+	glfwSetWindowUserPointer(state->glfw_window, state);
+	glfwSetErrorCallback(glfw_error_callback);
+	glfwSwapInterval(1);
 
-	if (state->window == NULL) {
-		fprintf(stderr, "Failed to create SDL window\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-
-		SDL_Quit();
-		return 0;
-	}
-
-	if (SDL_GL_CreateContext(state->window) == NULL) {
-		fprintf(stderr, "Failed to create OpenGL context\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-
-		SDL_DestroyWindow(state->window);
-		SDL_Quit();
-		return 0;
-	}
+	glfwSetInputMode(state->glfw_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+	glfwSetCharCallback(state->glfw_window, glfw_char_callback);
+	glfwSetKeyCallback(state->glfw_window, glfw_key_callback);
+	glfwSetFramebufferSizeCallback(state->glfw_window, glfw_resize_callback);
+	glfwSetWindowFocusCallback(state->glfw_window, glfw_focus_callback);
 
 	GLenum err = glewInit();
 	if (err != GLEW_OK) {
@@ -135,15 +184,12 @@ int init_term(term_t *state, config_t *config) {
 	}
 
 	state->window_active = true;
-	state->key_state = SDL_GetKeyboardState(NULL);
-	state->ticks = SDL_GetTicks();
-	SDL_StartTextInput();
 
-	// Make the OpenGL coordinate system orthagnoal from top-left
-	// This is identical to the non-accelerated SDL renderer coordinates
+	// Make the OpenGL coordinate system orthagonal from top-left
 	int draw_width, draw_height, win_width, win_height;
-	SDL_GL_GetDrawableSize(state->window, &draw_width, &draw_height);
-	SDL_GetWindowSize(state->window, &win_width, &win_height);
+	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
+	glfwGetWindowSize(state->glfw_window, &win_width, &win_height);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, win_width, win_height, 0, -1, 1);

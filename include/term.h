@@ -1,7 +1,8 @@
 #include <GL/glew.h>
-#include <SDL.h>
+#include <GLFW/glfw3.h>
 
 #include "font.h"
+#include "log.h"
 #include <inttypes.h>
 #include <signal.h>
 #include <sys/ioctl.h>
@@ -28,7 +29,7 @@ typedef struct {
 	VTerm *vterm;
 	VTermScreen *vterm_screen;
 	VTermState *vterm_state;
-	SDL_Window *window;
+	GLFWwindow *glfw_window;
 	bool window_active;
 
 	struct {
@@ -36,9 +37,6 @@ typedef struct {
 		int y;
 		bool active;
 	} cursor;
-
-	uint32_t ticks;
-	const uint8_t *key_state;
 
 	bool bell_active;
 	config_t *config;
@@ -57,3 +55,4 @@ void destroy_term(term_t *state);
 void render_term(term_t *state);
 void resize_term(term_t *state, int width, int height);
 int handle_term(term_t *state);
+void handle_key(term_t *state, int key, int mods);

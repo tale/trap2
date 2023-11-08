@@ -21,16 +21,15 @@ int main(void) {
 		return -1;
 	}
 
-	SDL_Delay(1);
-	resize_term(&state, state.config->width, state.config->height);
+	int draw_width, draw_height;
+	glfwGetFramebufferSize(state.glfw_window, &draw_width, &draw_height);
+	resize_term(&state, draw_width, draw_height);
 
-	while (!handle_term(&state)) {
+	while (!glfwWindowShouldClose(state.glfw_window) && !handle_term(&state)) {
 		if (state.window_active) {
 			render_term(&state);
+			glfwSwapBuffers(state.glfw_window);
 		}
-
-		SDL_GL_SwapWindow(state.window);
-		SDL_Delay(1);
 	}
 
 	destroy_term(&state);

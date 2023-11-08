@@ -9,6 +9,7 @@ lib_dir = meson.current_source_dir() + '/subprojects/vterm/.libs'
 
 sources = [
   'src/main.c',
+  'src/log.c',
   # 'src/shader.c',
   'src/font.c',
   'src/term/init.c',
@@ -25,8 +26,8 @@ executable('trap2', sources,
   include_directories: ['include'],
   dependencies: [
     dependency('freetype2', required: true),
-    dependency('sdl2', required: true),
     dependency('glew', required: true),
+    dependency('glfw3', required: true),
     dependency('OpenGL', required: true),
     declare_dependency(
       link_args: ['-L' + lib_dir, '-lvterm'],
