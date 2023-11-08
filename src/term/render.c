@@ -47,14 +47,7 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	}
 
 	// TODO: Other attributes
-
-	FT_Bitmap bitmap;
 	FT_UInt32 char_code = (FT_UInt32)chars;
-
-	if (get_bitmap(char_code, &bitmap, &state->font)) {
-		fprintf(stderr, "Could not get character bitmap\n");
-		return;
-	}
 
 	color_t color = {
 		.fg = {
@@ -71,15 +64,15 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	};
 
 	*offset += (state->font.face->glyph->advance.x >> 6);
-	render_glyph(&state->font, &bitmap, &coord, &color);
+	render_glyph(&state->font, char_code, &coord, &color);
 }
 
 void render_term(term_t *state) {
-	if (state->dirty) {
-		GLuint display_list = glGenLists(1);
-		glNewList(display_list, GL_COMPILE);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (state->dirty) {
+		// GLuint display_list = glGenLists(1);
+		// glNewList(display_list, GL_COMPILE);
 
 		int x_offset = 0;
 		for (int y = 0; y < state->config->rows; y++) {
@@ -103,6 +96,7 @@ void render_term(term_t *state) {
 			.height = font_height};
 
 		glBegin(GL_QUADS);
+		glColor3ub(255, 255, 255);
 
 		glTexCoord2f(0, 0);
 		glVertex2f(cursor.x, cursor.y);
@@ -117,7 +111,7 @@ void render_term(term_t *state) {
 		glVertex2f(cursor.x, cursor.y + cursor.height);
 
 		glEnd();
-		glEndList();
-		glCallList(display_list);
+		// glEndList();
+		// glCallList(display_list);
 	}
 }
