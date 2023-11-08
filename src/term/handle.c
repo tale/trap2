@@ -27,11 +27,18 @@ int handle_term(term_t *state) {
 
 	// Wait until the next keypress
 	while (SDL_PollEvent(&event)) {
-
 		switch (event.type) {
 		case SDL_QUIT:
 			fprintf(stderr, "SDL_QUIT\n");
 			return 1;
+			break;
+
+		case SDL_APP_DIDENTERBACKGROUND:
+			state->window_active = false;
+			break;
+
+		case SDL_APP_DIDENTERFOREGROUND:
+			state->window_active = true;
 			break;
 
 		case SDL_WINDOWEVENT:

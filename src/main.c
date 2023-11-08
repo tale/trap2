@@ -21,9 +21,16 @@ int main(void) {
 		return -1;
 	}
 
+	SDL_Delay(1);
+	resize_term(&state, state.config->width, state.config->height);
+
 	while (!handle_term(&state)) {
-		render_term(&state);
+		if (state.window_active) {
+			render_term(&state);
+		}
+
 		SDL_GL_SwapWindow(state.window);
+		SDL_Delay(1);
 	}
 
 	destroy_term(&state);

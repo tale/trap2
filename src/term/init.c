@@ -134,6 +134,7 @@ int init_term(term_t *state, config_t *config) {
 		return 0;
 	}
 
+	state->window_active = true;
 	state->key_state = SDL_GetKeyboardState(NULL);
 	state->ticks = SDL_GetTicks();
 	SDL_StartTextInput();

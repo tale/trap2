@@ -29,6 +29,7 @@ typedef struct {
 	VTermScreen *vterm_screen;
 	VTermState *vterm_state;
 	SDL_Window *window;
+	bool window_active;
 
 	struct {
 		int x;
