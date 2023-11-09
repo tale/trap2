@@ -31,7 +31,8 @@ void resize_term(term_t *state, int width, int height) {
 
 	printf("Resizing to %dx%d\n", cols, rows);
 
-	if (cols != state->config->rows || rows != state->config->cols) {
+	// TODO: Is there a way to stop infinite calls to resize and reduce it?
+	if (cols != state->config->cols || rows != state->config->rows) {
 
 		state->config->rows = rows;
 		state->config->cols = cols;

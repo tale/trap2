@@ -5,8 +5,13 @@ FT_UInt32 get_char_code_point(int values[]) {
 }
 
 void load_cache(font_t *font, FT_UInt32 char_code) {
+	if (char_code > MAX_CODE_POINT) {
+		fprintf(stderr, "Invalid char_code: %d\n", char_code);
+		return;
+	}
+
 	// Avoid loading the same glyph twice
-	if (font->glyphs[char_code].texture != 0) {
+	if (font->cache[char_code].texture != 0) {
 		return;
 	}
 
@@ -48,9 +53,10 @@ void load_cache(font_t *font, FT_UInt32 char_code) {
 	glyph_t glyph = {
 		.texture = texture_handle,
 		.metrics = font->face->glyph->metrics,
+		.advance = font->face->glyph->advance,
 	};
 
-	font->glyphs[char_code] = glyph;
+	font->cache[char_code] = glyph;
 }
 
 // Returns 0 on failure so that we can do if (!init_font()) {}
@@ -78,8 +84,8 @@ int init_font(font_t *font, char *font_file, float size) {
 
 	// Allocate font->glyphs by the number of glyphs in the font
 	int num_glyphs = font->face->num_glyphs;
-	font->glyphs = malloc(sizeof(GLuint) * num_glyphs);
-	if (!font->glyphs) {
+	font->cache = malloc(sizeof(glyph_t) * num_glyphs);
+	if (font->cache == NULL) {
 		fprintf(stderr, "Could not allocate font->glyphs\n");
 		return 0;
 	}
@@ -113,16 +119,20 @@ int get_bitmap(FT_UInt32 char_code, FT_Bitmap *bitmap, font_t *font) {
 	return 0;
 }
 
-int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color) {
+int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color, float opacity) {
 	// This has a harness to skip if already loaded
 	load_cache(font, char_code);
-	if (font->glyphs[char_code].texture == 0) {
+	if (font->cache[char_code].texture == 0) {
 		fprintf(stderr, "Could not load glyph for char_code: %d\n", char_code);
 		return 1;
 	}
 
-	GLuint texture_handle = font->glyphs[char_code].texture;
-	FT_Glyph_Metrics metrics = font->glyphs[char_code].metrics;
+	GLuint texture_handle = font->cache[char_code].texture;
+	FT_Glyph_Metrics metrics = font->cache[char_code].metrics;
+	FT_Vector advance = font->cache[char_code].advance;
+
+	coord->width = advance.x >> 6;
+	coord->height = advance.y >> 6;
 
 	// All the operations reference a diagram on FreeType's website
 	// https://freetype.org/freetype2/docs/glyphs/glyph-metrics-3.svg
@@ -176,7 +186,7 @@ int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *col
 	bottom_right.x -= right_side_bearing;
 
 	// Draw the background
-	glColor3ub(color->bg.r, color->bg.g, color->bg.b);
+	glColor4ub(color->bg.r, color->bg.g, color->bg.b, opacity);
 	glBegin(GL_QUADS);
 
 	glVertex2i(coord->x, coord->y);

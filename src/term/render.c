@@ -17,8 +17,6 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	coord_t coord = {
 		.x = *offset,
 		.y = y * linespace,
-		.width = state->font.face->glyph->advance.x >> 6,
-		.height = state->font.face->glyph->advance.y >> 6,
 	};
 
 	vterm_state_convert_color_to_rgb(state->vterm_state, &cell.fg);
@@ -63,16 +61,17 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 		},
 	};
 
-	*offset += (state->font.face->glyph->advance.x >> 6);
-	render_glyph(&state->font, char_code, &coord, &color);
+	*offset += (state->font.face->size->metrics.max_advance >> 6);
+	render_glyph(&state->font, char_code, &coord, &color, state->config->opacity);
 }
 
 void render_term(term_t *state) {
+	glClearColor(0, 0, 0, state->config->opacity);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (state->dirty) {
-		// GLuint display_list = glGenLists(1);
 		// glNewList(display_list, GL_COMPILE);
+		// GLuint display_list = glGenLists(1);
 
 		int x_offset = 0;
 		for (int y = 0; y < state->config->rows; y++) {

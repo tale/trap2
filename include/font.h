@@ -4,17 +4,20 @@
 #include FT_FREETYPE_H
 #include <OpenGL/gl.h>
 
+#define MAX_CODE_POINT 0x10FFFF
+
 // The index for a glyph is its character code point.
 // This is a hashmap like structure implementation
 typedef struct {
 	GLuint texture;
 	FT_Glyph_Metrics metrics;
+	FT_Vector advance;
 } glyph_t;
 
 typedef struct {
 	FT_Library library;
 	FT_Face face;
-	glyph_t *glyphs;
+	glyph_t *cache;
 } font_t;
 
 typedef struct {
@@ -47,4 +50,4 @@ FT_UInt32 get_char_code_point(int values[]);
 int init_font(font_t *font, char *font_file, float size);
 
 int get_bitmap(FT_UInt32 char_code, FT_Bitmap *bitmap, font_t *font);
-int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color);
+int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color, float opacity);
