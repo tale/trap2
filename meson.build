@@ -6,12 +6,11 @@ project('trap2', 'c', default_options: [
 # Honestly can Apple just shut up about the deprecation warnings
 add_global_arguments('-DGL_SILENCE_DEPRECATION', language: 'c')
 vterm_lib = meson.current_source_dir() + '/subprojects/vterm/.libs'
-wgpu_lib = meson.current_source_dir() + '/subprojects/wgpu_native'
 
 sources = [
   'src/main.c',
   'src/log.c',
-  # 'src/shader.c',
+  'src/shader.c',
   'src/font.c',
   'src/term/init.c',
   'src/term/destroy.c',
@@ -32,12 +31,10 @@ executable('trap2', sources,
     dependency('OpenGL', required: true),
     declare_dependency(
       link_args: [
-        '-L' + vterm_lib, '-lvterm',
-        '-L' + wgpu_lib, '-lwgpu_native'
+        '-L' + vterm_lib, '-lvterm'
       ],
       include_directories: [
-        'subprojects/vterm/include',
-        'subprojects/wgpu_native'
+        'subprojects/vterm/include'
       ]
     )
   ]
