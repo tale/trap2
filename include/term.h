@@ -23,6 +23,7 @@ typedef struct {
 	int rows;
 	int cols;
 	int dpi;
+	int opacity;
 } config_t;
 
 typedef struct {
