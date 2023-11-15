@@ -3,7 +3,7 @@
 
 `trap2` is a terminal emulator for macOS that uses the GPU to render the terminal.
 It's built with OpenGL 2 Legacy, GLFW 3, and `libvterm`, with a focus on simplicity and performance.
-Currently, this project is in a very unstable and it won't even compile for you right now.
+Currently, this project is in a very unstable and it most likely won't even compile for you right now.
 
 ### Future Goals
 This is very much a work in progress, and I have a lot of ideas for the future:
@@ -29,6 +29,12 @@ Since this is a personal project, it will revolve around my own preferences:
 - It'll really only be tested properly on macOS for now, this may change
 
 ### Building
-Soon™
+The project uses [Meson](https://mesonbuild.com/) as its build system, though I'm looking to switch to CMake. Anyways, install `meson` and all of its dependencies and then run the following steps:
+
+1. `mkdir build && cd build`
+2. `meson .. && cd ..`
+3. `ninja -C build`
+
+This should produce a binary in your `build` folder called trap2, which you can run with `./build/trap2`.
 
 > Copyright (c) 2023, Aarnav Tale
