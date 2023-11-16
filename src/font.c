@@ -186,7 +186,7 @@ int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *col
 	bottom_right.x -= right_side_bearing;
 
 	// Draw the background
-	glColor4ub(color->bg.r, color->bg.g, color->bg.b, opacity);
+	glColor3ub(color->bg.r, color->bg.g, color->bg.b);
 	glBegin(GL_QUADS);
 
 	glVertex2i(coord->x, coord->y);

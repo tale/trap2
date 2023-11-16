@@ -58,12 +58,9 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 		},
 
 		.bg = {
-			// .r = bg_red,
-			// .g = bg_green,
-			// .b = bg_blue,
-			.r = 0,
-			.g = 0,
-			.b = 255,
+			.r = bg_red,
+			.g = bg_green,
+			.b = bg_blue,
 		},
 	};
 
