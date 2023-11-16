@@ -170,12 +170,16 @@ int init_term(term_t *state, config_t *config) {
 	glfwSetErrorCallback(glfw_error_callback);
 	glfwSwapInterval(1);
 
+	log_info("OpenGL Version: %s", glGetString(GL_VERSION));
+	log_info("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+
 	glfwSetInputMode(state->glfw_window, GLFW_STICKY_KEYS, GLFW_TRUE);
 	glfwSetCharCallback(state->glfw_window, glfw_char_callback);
 	glfwSetKeyCallback(state->glfw_window, glfw_key_callback);
 	glfwSetFramebufferSizeCallback(state->glfw_window, glfw_resize_callback);
 	glfwSetWindowFocusCallback(state->glfw_window, glfw_focus_callback);
 
+	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (err != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
@@ -201,6 +205,7 @@ int init_term(term_t *state, config_t *config) {
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// TODO: Font scaling is wrong on non-retina displays
 	int font_size = state->config->font_size / state->config->dpi;
 	if (!init_font(&state->font, state->config->font, font_size)) {
 		fprintf(stderr, "Failed to initialize font\n");
@@ -222,6 +227,7 @@ int init_term(term_t *state, config_t *config) {
 	}
 
 	vterm_screen_enable_altscreen(state->vterm_screen, 1);
+	vterm_screen_enable_reflow(state->vterm_screen, 1);
 	vterm_screen_reset(state->vterm_screen, 1);
 
 	state->vterm_state = vterm_obtain_state(state->vterm);
