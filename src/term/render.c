@@ -10,14 +10,17 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 
 	vterm_screen_get_cell(state->vterm_screen, pos, &cell);
 	uint32_t chars = cell.chars[0];
-	if (chars == 0) {
-		return;
-	}
 
 	coord_t coord = {
 		.x = *offset,
 		.y = y * linespace,
 	};
+
+	// It's important to increase offset BEFORE skipping empty cells
+	*offset += (state->font.face->size->metrics.max_advance >> 6);
+	if (chars == 0) {
+		return;
+	}
 
 	vterm_state_convert_color_to_rgb(state->vterm_state, &cell.fg);
 	vterm_state_convert_color_to_rgb(state->vterm_state, &cell.bg);
@@ -55,13 +58,15 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 		},
 
 		.bg = {
-			.r = bg_red,
-			.g = bg_green,
-			.b = bg_blue,
+			// .r = bg_red,
+			// .g = bg_green,
+			// .b = bg_blue,
+			.r = 0,
+			.g = 0,
+			.b = 255,
 		},
 	};
 
-	*offset += (state->font.face->size->metrics.max_advance >> 6);
 	render_glyph(&state->font, char_code, &coord, &color, state->config->opacity);
 }
 
