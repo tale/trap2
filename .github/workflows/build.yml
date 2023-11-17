@@ -44,6 +44,16 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install Linux Dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: >
+        sudo apt-get install -y \
+        libxrandr-dev \
+        libxinerama-dev \
+        libxkbcommon-dev \
+        libxcursor-dev \
+        libxi-dev
+
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
