@@ -1,8 +1,8 @@
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 #include "font.h"
 #include "log.h"
+#include <GLFW/glfw3.h>
 #include <inttypes.h>
 #include <signal.h>
 #include <sys/ioctl.h>
