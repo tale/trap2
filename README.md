@@ -29,12 +29,13 @@ Since this is a personal project, it will revolve around my own preferences:
 - It'll really only be tested properly on macOS for now, this may change
 
 ### Building
-The project uses [Meson](https://mesonbuild.com/) as its build system, though I'm looking to switch to CMake. Anyways, install `meson` and all of its dependencies and then run the following steps:
+The project uses [CMake](https://cmake.org/) as its build system. Install `cmake` and all of its dependencies and then run the following steps:
 
+0. Edit `main.c` because the `config_t` struct is hardcoded to my shell and my font file.
 1. `mkdir build && cd build`
-2. `meson .. && cd ..`
-3. `ninja -C build`
+2. `cmake ..`
+3. `make`
 
-This should produce a binary in your `build` folder called trap2, which you can run with `./build/trap2`.
+This should produce a binary in your `build` folder which you can run with `./build/trap2`.
 
 > Copyright (c) 2023, Aarnav Tale
