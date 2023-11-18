@@ -19,11 +19,19 @@ if(NOT vterm_POPULATED)
 	)
 
     target_compile_options(vterm INTERFACE
-        -Wall
-        -I${CMAKE_CURRENT_SOURCE_DIR}/include
         -std=c99
-        -Wpedantic
     )
+
+	if (WIN32)
+		target_compile_options(vterm INTERFACE
+			/W4
+		)
+	else()
+		target_compile_options(vterm INTERFACE
+			-Wall
+			-Wpedantic
+		)
+	endif()
 
     file(GLOB TBLFILES ${vterm_SOURCE_DIR}/src/encoding/*.tbl)
     foreach(TBL_FILE ${TBLFILES})

@@ -47,11 +47,11 @@ jobs:
     - name: Install Linux Dependencies
       if: matrix.os == 'ubuntu-latest'
       run: >
-        sudo apt-get install -y \
-        libxrandr-dev \
-        libxinerama-dev \
-        libxkbcommon-dev \
-        libxcursor-dev \
+        sudo apt-get install -y 
+        libxrandr-dev 
+        libxinerama-dev 
+        libxkbcommon-dev 
+        libxcursor-dev 
         libxi-dev
 
     - name: Configure CMake
