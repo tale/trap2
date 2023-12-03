@@ -71,7 +71,7 @@ void *draw_thread(void *argp) {
 	term_t *state = (term_t *)argp;
 
 	glfwMakeContextCurrent(state->glfw_window);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 
 	log_info("OpenGL Version: %s", glGetString(GL_VERSION));
 	log_info("OpenGL Renderer: %s", glGetString(GL_RENDERER));
@@ -111,14 +111,11 @@ void *draw_thread(void *argp) {
 		CGLLockContext(ctx);
 
 		if (state->threads.resize) {
-			pthread_mutex_lock(&state->threads.mutex);
 			resize_term_thread(state);
 			state->threads.resize = false;
-			pthread_mutex_unlock(&state->threads.mutex);
 		}
 
 		if (state->window_active) {
-			glfwMakeContextCurrent(state->glfw_window);
 			render_term(state);
 			glfwSwapBuffers(state->glfw_window);
 		}

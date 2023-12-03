@@ -10,7 +10,6 @@ void destroy_term(term_t *state) {
 	state->threads.active = false;
 	pthread_join(state->threads.pty_thread, NULL);
 	pthread_join(state->threads.draw_thread, NULL);
-	pthread_mutex_destroy(&state->threads.mutex);
 
 	glfwDestroyWindow(state->glfw_window);
 	glfwTerminate();

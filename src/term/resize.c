@@ -1,11 +1,9 @@
 #include "term.h"
 
 void resize_term(term_t *state, int width, int height) {
-	pthread_mutex_lock(&state->threads.mutex);
 	state->config->width = width;
 	state->config->height = height;
 	state->threads.resize = true;
-	pthread_mutex_unlock(&state->threads.mutex);
 }
 
 void *resize_term_thread(void *argp) {

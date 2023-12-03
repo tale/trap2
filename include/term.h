@@ -44,7 +44,6 @@ typedef struct {
 	struct {
 		pthread_t draw_thread;
 		pthread_t pty_thread;
-		pthread_mutex_t mutex;
 		bool active;
 		bool resize;
 	} threads;
