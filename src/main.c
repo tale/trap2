@@ -25,11 +25,8 @@ int main(void) {
 	glfwGetFramebufferSize(state.glfw_window, &draw_width, &draw_height);
 	resize_term(&state, draw_width, draw_height);
 
-	while (!glfwWindowShouldClose(state.glfw_window) && !handle_term(&state)) {
-		if (state.window_active) {
-			render_term(&state);
-			glfwSwapBuffers(state.glfw_window);
-		}
+	while (!glfwWindowShouldClose(state.glfw_window)) {
+		glfwWaitEvents();
 	}
 
 	destroy_term(&state);

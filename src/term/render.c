@@ -67,6 +67,70 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	render_glyph(&state->font, char_code, &coord, &color, state->config->opacity);
 }
 
+void *draw_thread(void *argp) {
+	term_t *state = (term_t *)argp;
+
+	glfwMakeContextCurrent(state->glfw_window);
+	glfwSwapInterval(1);
+
+	log_info("OpenGL Version: %s", glGetString(GL_VERSION));
+	log_info("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		fprintf(stderr, "%s\n", glewGetErrorString(err));
+		return 0;
+	}
+
+	// Make the OpenGL coordinate system orthagonal from top-left
+	int draw_width, draw_height, win_width, win_height;
+	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
+	glfwGetWindowSize(state->glfw_window, &win_width, &win_height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, win_width, win_height, 0, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+
+	state->config->dpi = draw_width / win_width;
+
+	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int font_size = state->config->font_size / state->config->dpi;
+	if (!init_font(&state->font, state->config->font, font_size)) {
+		fprintf(stderr, "Failed to initialize font\n");
+		return 0;
+	}
+
+	while (state->draw_thread.active) {
+		CGLContextObj ctx = CGLGetCurrentContext();
+		CGLLockContext(ctx);
+
+		if (state->draw_thread.resize) {
+			pthread_mutex_lock(&state->draw_thread.mutex);
+			resize_term_thread(state);
+			state->draw_thread.resize = false;
+			pthread_mutex_unlock(&state->draw_thread.mutex);
+		}
+
+		if (state->window_active) {
+			glfwMakeContextCurrent(state->glfw_window);
+			render_term(state);
+			glfwSwapBuffers(state->glfw_window);
+		}
+
+		CGLUnlockContext(ctx);
+	}
+
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+	return NULL;
+}
+
 void render_term(term_t *state) {
 	glClearColor(0, 0, 0, state->config->opacity);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

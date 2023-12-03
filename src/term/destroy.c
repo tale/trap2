@@ -7,8 +7,10 @@ void destroy_term(term_t *state) {
 	FT_Done_Face(state->font.face);
 	FT_Done_FreeType(state->font.library);
 
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
+	state->threads.active = false;
+	pthread_join(state->threads.pty_thread, NULL);
+	pthread_join(state->threads.draw_thread, NULL);
+	pthread_mutex_destroy(&state->threads.mutex);
 
 	glfwDestroyWindow(state->glfw_window);
 	glfwTerminate();

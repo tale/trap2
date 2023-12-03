@@ -3,7 +3,9 @@
 #include "font.h"
 #include "log.h"
 #include <GLFW/glfw3.h>
+#include <OpenGL/OpenGL.h>
 #include <inttypes.h>
+#include <pthread.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -39,6 +41,14 @@ typedef struct {
 		bool active;
 	} cursor;
 
+	struct {
+		pthread_t draw_thread;
+		pthread_t pty_thread;
+		pthread_mutex_t mutex;
+		bool active;
+		bool resize;
+	} threads;
+
 	bool bell_active;
 	config_t *config;
 	font_t font;
@@ -55,5 +65,7 @@ int init_term(term_t *state, config_t *config);
 void destroy_term(term_t *state);
 void render_term(term_t *state);
 void resize_term(term_t *state, int width, int height);
-int handle_term(term_t *state);
+void *resize_term_thread(void *argp);
+void *pty_read_thread(void *argp);
+void *draw_thread(void *argp);
 void handle_key(term_t *state, int key, int mods);

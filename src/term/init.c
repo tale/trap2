@@ -165,53 +165,16 @@ int init_term(term_t *state, config_t *config) {
 	// The sigaction needs this for printing
 	window = state->glfw_window;
 
-	glfwMakeContextCurrent(state->glfw_window);
 	glfwSetWindowUserPointer(state->glfw_window, state);
 	glfwSetErrorCallback(glfw_error_callback);
-	glfwSwapInterval(1);
-
-	log_info("OpenGL Version: %s", glGetString(GL_VERSION));
-	log_info("OpenGL Renderer: %s", glGetString(GL_RENDERER));
-
 	glfwSetInputMode(state->glfw_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+
 	glfwSetCharCallback(state->glfw_window, glfw_char_callback);
 	glfwSetKeyCallback(state->glfw_window, glfw_key_callback);
 	glfwSetFramebufferSizeCallback(state->glfw_window, glfw_resize_callback);
 	glfwSetWindowFocusCallback(state->glfw_window, glfw_focus_callback);
 
-	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		fprintf(stderr, "%s\n", glewGetErrorString(err));
-		return 0;
-	}
-
 	state->window_active = true;
-
-	// Make the OpenGL coordinate system orthagonal from top-left
-	int draw_width, draw_height, win_width, win_height;
-	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
-	glfwGetWindowSize(state->glfw_window, &win_width, &win_height);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, win_width, win_height, 0, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-
-	state->config->dpi = draw_width / win_width;
-
-	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// TODO: Font scaling is wrong on non-retina displays
-	int font_size = state->config->font_size / state->config->dpi;
-	if (!init_font(&state->font, state->config->font, font_size)) {
-		fprintf(stderr, "Failed to initialize font\n");
-		return 0;
-	}
-
 	state->vterm = vterm_new(state->config->rows, state->config->cols);
 	if (state->vterm == NULL) {
 		fprintf(stderr, "Failed to initialize vterm\n");
@@ -238,6 +201,14 @@ int init_term(term_t *state, config_t *config) {
 
 	vterm_screen_set_callbacks(state->vterm_screen, &callbacks, state);
 	vterm_output_set_callback(state->vterm, vterm_output_callback, &state->child_fd);
+
+	// Yay we are doing multithreading now to make stuff fast
+	// Create a new thread for checking with the child pty
+	// The function to read a page from the child is slow
+	state->threads.active = true;
+	pthread_mutex_init(&state->threads.mutex, NULL);
+	pthread_create(&state->threads.pty_thread, NULL, pty_read_thread, &state);
+	pthread_create(&state->threads.draw_thread, NULL, draw_thread, &state);
 
 	state->child_pty = forkpty(&state->child_fd, NULL, NULL, NULL);
 	if (state->child_pty < 0) {
