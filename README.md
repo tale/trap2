@@ -10,8 +10,6 @@ This is very much a work in progress, and I have a lot of ideas for the future:
 
 - [ ] Switch to a more powerful rendering pipeline
 - [ ] Integrate clipboard support
-- [ ] Batch rendering calls
-- [ ] Improve font rendering
 - [ ] Better testing harnesses
 
 ### Rationale
@@ -20,16 +18,22 @@ One of the projects required me to implement a shell from scratch, so I decided 
 I've always been interested in terminal emulators, and I've always wanted to build one myself.
 
 I'm perfectly content with the terminal I currently use, [WezTerm](https://wezfurlong.org/wezterm), but I just wanted to experiment.
-This leads into the next section, limitations, where I'm laying out things I don't care about/don't want to implement at this time.
-
-### Limitations
-Since this is a personal project, it will revolve around my own preferences:
+This leads into the 3 limitations that I'm defining for this project (subject to change):
 - No support for scrollback since I use [tmux](https://github.com/tmux/tmux) as my multiplexer
 - No support for mouse input since I don't use the mouse in the terminal
 - It'll really only be tested properly on macOS for now, this may change
 
+### Technical Details
+- The program uses `libvterm` to handle the terminal state machine
+- A multi-threaded GLFW setup is used to handle the input and rendering
+    - The main thread handles opening the window and taking events
+    - The render thread makes all of the OpenGL draw calls
+    - The `pty` thread handles reading the child fork output
+    - Minimal synchronization is needed or used to keep things fast
+- Rendering is done using `freetype2` and complex math to position glyphs
+
 ### Building
-The project uses [CMake](https://cmake.org/) as its build system. Install `cmake` and all of its dependencies and then run the following steps:
+The project uses [CMake](https://cmake.org/) as its build system. Install `cmake` and then run the following steps:
 
 0. Edit `main.c` because the `config_t` struct is hardcoded to my shell and my font file.
 1. `mkdir build && cd build`
