@@ -202,14 +202,6 @@ int init_term(term_t *state, config_t *config) {
 	vterm_screen_set_callbacks(state->vterm_screen, &callbacks, state);
 	vterm_output_set_callback(state->vterm, vterm_output_callback, &state->child_fd);
 
-	// Yay we are doing multithreading now to make stuff fast
-	// Create a new thread for checking with the child pty
-	// The function to read a page from the child is slow
-	state->threads.active = true;
-	pthread_mutex_init(&state->threads.mutex, NULL);
-	pthread_create(&state->threads.pty_thread, NULL, pty_read_thread, &state);
-	pthread_create(&state->threads.draw_thread, NULL, draw_thread, &state);
-
 	state->child_pty = forkpty(&state->child_fd, NULL, NULL, NULL);
 	if (state->child_pty < 0) {
 		fprintf(stderr, "Failed to forkpty\n");

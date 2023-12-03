@@ -21,6 +21,13 @@ int main(void) {
 		return -1;
 	}
 
+	// Yay we are doing multithreading now to make stuff fast
+	// Note: Needs to be called after init_term because of context
+	state.threads.active = true;
+	pthread_mutex_init(&state.threads.mutex, NULL);
+	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
+	pthread_create(&state.threads.draw_thread, NULL, draw_thread, &state);
+
 	int draw_width, draw_height;
 	glfwGetFramebufferSize(state.glfw_window, &draw_width, &draw_height);
 	resize_term(&state, draw_width, draw_height);

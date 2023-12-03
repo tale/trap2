@@ -106,15 +106,15 @@ void *draw_thread(void *argp) {
 		return 0;
 	}
 
-	while (state->draw_thread.active) {
+	while (state->threads.active) {
 		CGLContextObj ctx = CGLGetCurrentContext();
 		CGLLockContext(ctx);
 
-		if (state->draw_thread.resize) {
-			pthread_mutex_lock(&state->draw_thread.mutex);
+		if (state->threads.resize) {
+			pthread_mutex_lock(&state->threads.mutex);
 			resize_term_thread(state);
-			state->draw_thread.resize = false;
-			pthread_mutex_unlock(&state->draw_thread.mutex);
+			state->threads.resize = false;
+			pthread_mutex_unlock(&state->threads.mutex);
 		}
 
 		if (state->window_active) {

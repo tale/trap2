@@ -3,7 +3,7 @@
 void *pty_read_thread(void *argp) {
 	term_t *state = (term_t *)argp;
 
-	while (state->draw_thread.active) {
+	while (state->threads.active) {
 		// Update the terminal state machine for vterm
 		// Allows us to keep our state machine in sync
 		fd_set readfds;
