@@ -1,3 +1,4 @@
+#include "mac.h"
 #include "term.h"
 
 GLFWwindow *window;
@@ -161,6 +162,10 @@ int init_term(term_t *state, config_t *config) {
 		glfwTerminate();
 		return 0;
 	}
+
+#ifdef __APPLE__
+	darkenTitlebar();
+#endif
 
 	// The sigaction needs this for printing
 	window = state->glfw_window;

@@ -30,6 +30,7 @@ add_executable(trap2
 	src/term/handle.c
 	src/term/render.c
 	src/term/resize.c
+	src/platform/mac.m
 )
 
 # Silence GL deprecations if on macOS
