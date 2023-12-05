@@ -2,22 +2,19 @@
 
 int main(void) {
 	term_t state;
-	char *argv[] = {"bash", "-l", "-i", NULL};
+	config_t config;
 
-	config_t config = {
-		.width = 800,
-		.height = 600,
-		.font = "iosevka.ttf",
-		.font_size = 15,
-		.shell = "/run/current-system/sw/bin/bash",
-		.argv = argv,
-		.cols = 80,
-		.rows = 24,
-		.dpi = 1,
-	};
+	if (!init_config(&config)) {
+		log_error("Failed to initialize config");
+		return -1;
+	}
+
+	if (!load_config(&config)) {
+		log_warn("Unable to load config, falling back to defaults");
+	}
 
 	if (!init_term(&state, &config)) {
-		fprintf(stderr, "Failed to initialize terminal\n");
+		log_error("Failed to initialize term");
 		return -1;
 	}
 
@@ -36,5 +33,7 @@ int main(void) {
 	}
 
 	destroy_term(&state);
+	// TODO: Segfaulting in the end on quit, need to fix
+	destroy_config(&config);
 	return 0;
 }

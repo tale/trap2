@@ -208,11 +208,16 @@ int init_term(term_t *state, config_t *config) {
 		return 0;
 	}
 
+	char *exec_argv[64] = {config->shell};
+	for (int i = 0; i < config->argc; i++) {
+		exec_argv[i + 1] = config->argv[i];
+	}
+
 	// If running in child
 	if (state->child_pty == 0) {
 		setenv("TERM", "xterm-256color", 1);
 		setenv("COLORTERM", "truecolor", 1);
-		execv(config->shell, config->argv);
+		execv(config->shell, exec_argv);
 	} else {
 		// Block the sigaction for SIGCHLD
 		// Because we terminate it in the end

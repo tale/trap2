@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 
+#include "config.h"
 #include "font.h"
 #include "log.h"
 #include <GLFW/glfw3.h>
@@ -13,20 +14,6 @@
 #include <vterm.h>
 
 // TODO: Conform all types to inttypes.h
-typedef struct {
-	char *shell;
-	char **argv;
-	char *font;
-	float font_size;
-
-	int width;
-	int height;
-
-	int rows;
-	int cols;
-	int dpi;
-	int opacity;
-} config_t;
 
 typedef struct {
 	VTerm *vterm;

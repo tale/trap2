@@ -21,6 +21,7 @@ include(cmake/freetype.cmake)
 
 add_executable(trap2
 	src/main.c
+	src/config.c
 	src/log.c
 	src/shader.c
 	src/font.c

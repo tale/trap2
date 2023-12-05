@@ -1,4 +1,5 @@
 #include "font.h"
+#include "log.h"
 
 FT_UInt32 get_char_code_point(int values[]) {
 	return (FT_UInt32)*values;
@@ -61,6 +62,7 @@ void load_cache(font_t *font, FT_UInt32 char_code) {
 
 // Returns 0 on failure so that we can do if (!init_font()) {}
 int init_font(font_t *font, char *font_file, float size) {
+	log_info("Loading font: %s", font_file);
 	FT_Error error;
 
 	error = FT_Init_FreeType(&font->library);
