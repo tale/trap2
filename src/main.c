@@ -24,16 +24,17 @@ int main(void) {
 	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
 	pthread_create(&state.threads.draw_thread, NULL, draw_thread, &state);
 
-	int draw_width, draw_height;
-	glfwGetFramebufferSize(state.glfw_window, &draw_width, &draw_height);
-	resize_term(&state, draw_width, draw_height);
+	pthread_detach(state.threads.pty_thread);
+	pthread_detach(state.threads.draw_thread);
+
+	pthread_mutex_init(&state.global_lock, NULL);
+	pthread_cond_init(&state.global_cond, NULL);
 
 	while (!glfwWindowShouldClose(state.glfw_window)) {
 		glfwWaitEvents();
 	}
 
 	destroy_term(&state);
-	// TODO: Segfaulting in the end on quit, need to fix
 	destroy_config(&config);
 	return 0;
 }

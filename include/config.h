@@ -19,7 +19,7 @@ typedef struct {
 	int rows;
 	int cols;
 	int dpi;
-	int opacity;
+	float opacity;
 } config_t;
 
 int init_config(config_t *config);

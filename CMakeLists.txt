@@ -24,12 +24,15 @@ add_executable(trap2
 	src/config.c
 	src/log.c
 	src/shader.c
-	src/font.c
 	src/term/init.c
 	src/term/destroy.c
 	src/term/handle.c
 	src/term/render.c
 	src/term/resize.c
+	src/term/render/cell.c
+	src/term/render/font.c
+	src/term/render/main.c
+	src/term/render/util.c
 	src/platform/mac.m
 )
 

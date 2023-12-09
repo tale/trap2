@@ -13,47 +13,38 @@ void *pty_read_thread(void *argp) {
 		FD_SET(state->child_fd, &readfds);
 
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 50000;
+		timeout.tv_usec = 1000;
 
 		if (select(state->child_fd + 1, &readfds, NULL, NULL, &timeout) > 0) {
 			// Page size is the most efficient buffer size in this case
 			// It doesn't make sense to read more than a page at a time
 			size_t page_size = getpagesize();
 			char line[page_size];
-			int n;
 
-			if ((n = read(state->child_fd, line, sizeof(line))) > 0) {
-				vterm_input_write(state->vterm, line, n);
-				state->dirty = true;
+			size_t len = read(state->child_fd, line, sizeof(line));
+			if (len < 0) {
+				log_error("Failed to read from pty: %s", strerror(errno));
+				break;
 			}
+
+			if (len == 0) {
+				break;
+			}
+
+			vterm_input_write(state->vterm, line, len);
+			pthread_mutex_lock(&state->global_lock);
+
+			state->should_render = true;
+			pthread_cond_signal(&state->global_cond);
+			pthread_mutex_unlock(&state->global_lock);
 		}
 	}
 
-	return NULL;
+	pthread_exit(NULL);
 }
 
 // These only fire on keydown because they are important for escape sequences
 void handle_key(term_t *state, int key, int mods) {
-	int vterm_modifier = VTERM_MOD_NONE;
-
-	if (mods & GLFW_MOD_CONTROL) {
-		vterm_modifier |= VTERM_MOD_CTRL;
-	}
-
-	// Alt is equivalent to Meta on macOS
-	if (mods & GLFW_MOD_ALT) {
-		vterm_modifier |= VTERM_MOD_ALT;
-	}
-
-	if (mods & GLFW_MOD_SHIFT) {
-		vterm_modifier |= VTERM_MOD_SHIFT;
-	}
-
-	if (mods & GLFW_MOD_SUPER) {
-		// TODO: VTerm doesn't support super key
-		// Makes sense since XTerm doesn't either
-	}
-
 	switch (key) {
 	case GLFW_KEY_ENTER:
 	case GLFW_KEY_KP_ENTER:

@@ -8,8 +8,8 @@ void destroy_term(term_t *state) {
 	FT_Done_FreeType(state->font.library);
 
 	state->threads.active = false;
-	pthread_join(state->threads.pty_thread, NULL);
-	pthread_join(state->threads.draw_thread, NULL);
+	// pthread_join(state->threads.pty_thread, NULL);
+	// pthread_join(state->threads.draw_thread, NULL);
 
 	glfwDestroyWindow(state->glfw_window);
 	glfwTerminate();

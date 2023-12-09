@@ -78,7 +78,13 @@ void glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
 
 void glfw_resize_callback(GLFWwindow *window, int width, int height) {
 	term_t *state = glfwGetWindowUserPointer(window);
-	resize_term(state, width, height);
+	pthread_mutex_lock(&state->global_lock);
+
+	state->should_resize = true;
+	state->should_render = true;
+
+	pthread_cond_signal(&state->global_cond);
+	pthread_mutex_unlock(&state->global_lock);
 }
 
 void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -124,8 +130,10 @@ int init_term(term_t *state, config_t *config) {
 		return 0;
 	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_DEPTH_BITS, 24);
@@ -235,6 +243,7 @@ int init_term(term_t *state, config_t *config) {
 		child_state = 1;
 	}
 
-	state->dirty = true;
+	state->should_render = true;
+	state->should_resize = true;
 	return 1;
 }

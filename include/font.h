@@ -2,7 +2,7 @@
 // THe goal is we have a few functions that we can call to get the entire character glyph rendered and ready to call with glDrawPixels.
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <OpenGL/gl.h>
+#include <GL/glew.h>
 
 #define MAX_CODE_POINT 0x10FFFF
 
@@ -49,5 +49,10 @@ typedef struct {
 FT_UInt32 get_char_code_point(int values[]);
 int init_font(font_t *font, char *font_file, float size);
 
+typedef struct {
+	GLfloat x, y; // Position
+	GLfloat s, t; // TexCoord
+} cell_vertex_t;
+
 int get_bitmap(FT_UInt32 char_code, FT_Bitmap *bitmap, font_t *font);
-int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color, float opacity);
+int render_glyph(font_t *font, FT_UInt32 char_code, coord_t *coord, color_t *color, float opacity, GLuint vbo);

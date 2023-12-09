@@ -3,6 +3,7 @@
 #include "config.h"
 #include "font.h"
 #include "log.h"
+#include "shader.h"
 #include <GLFW/glfw3.h>
 #include <OpenGL/OpenGL.h>
 #include <inttypes.h>
@@ -16,6 +17,15 @@
 // TODO: Conform all types to inttypes.h
 
 typedef struct {
+	bool global_active;
+	bool should_render;
+	bool should_resize;
+
+	pthread_mutex_t global_lock;
+	pthread_cond_t global_cond;
+
+	config_t *config;
+
 	VTerm *vterm;
 	VTermScreen *vterm_screen;
 	VTermState *vterm_state;
@@ -36,12 +46,18 @@ typedef struct {
 	} threads;
 
 	bool bell_active;
-	config_t *config;
 	font_t font;
 	bool dirty;
+	bool unhandled_key;
 
 	pid_t child_pty;
 	int child_fd;
+
+	struct {
+		GLuint program;
+		GLuint vao;
+		GLuint vbo;
+	} gl_state;
 } term_t;
 
 // Global to work with signal handler
@@ -51,7 +67,13 @@ int init_term(term_t *state, config_t *config);
 void destroy_term(term_t *state);
 void render_term(term_t *state);
 void resize_term(term_t *state, int width, int height);
-void *resize_term_thread(void *argp);
 void *pty_read_thread(void *argp);
 void *draw_thread(void *argp);
 void handle_key(term_t *state, int key, int mods);
+
+// Rendering functions
+int get_gl_error(void);
+int init_gl_context(term_t *state);
+void destroy_gl_context(term_t *state);
+void update_projection(term_t *state);
+void render_cell(term_t *state, int x, int y, int *offset);
