@@ -2,13 +2,12 @@
 > A state machine powered, GPU accelerated Terminal for macOS.
 
 `trap2` is a terminal emulator for macOS that uses the GPU to render the terminal.
-It's built with OpenGL 2 Legacy, GLFW 3, and `libvterm`, with a focus on simplicity and performance.
+It's built with OpenGL 4.1 Core Profile, GLFW 3, and `libvterm`, with a focus on simplicity and performance.
 Currently, this project is in a very unstable and it most likely won't even compile for you right now.
 
 ### Future Goals
 This is very much a work in progress, and I have a lot of ideas for the future:
 
-- [ ] Switch to a more powerful rendering pipeline
 - [ ] Integrate clipboard support
 - [ ] Better testing harnesses
 
@@ -35,7 +34,7 @@ This leads into the 3 limitations that I'm defining for this project (subject to
 ### Building
 The project uses [CMake](https://cmake.org/) as its build system. Install `cmake` and then run the following steps:
 
-0. Edit `main.c` because the `config_t` struct is hardcoded to my shell and my font file.
+0. Define a configuration file, see [doc/config.md](doc/config.md) for more details.
 1. `mkdir build && cd build`
 2. `cmake ..`
 3. `make`
