@@ -44,7 +44,7 @@ int settermprop(VTermProp prop, VTermValue *val, void *user) {
 
 int bell(void *user) {
 	term_t *state = (term_t *)user;
-	state->bell_active = true;
+	glfwRequestWindowAttention(state->glfw_window);
 	return 1;
 }
 
