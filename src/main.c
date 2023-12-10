@@ -20,15 +20,14 @@ int main(void) {
 
 	// Yay we are doing multithreading now to make stuff fast
 	// Note: Needs to be called after init_term because of context
-	state.threads.active = true;
 	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
 	pthread_create(&state.threads.draw_thread, NULL, draw_thread, &state);
 
 	pthread_detach(state.threads.pty_thread);
 	pthread_detach(state.threads.draw_thread);
 
-	pthread_mutex_init(&state.global_lock, NULL);
-	pthread_cond_init(&state.global_cond, NULL);
+	pthread_mutex_init(&state.states.lock, NULL);
+	pthread_cond_init(&state.states.cond, NULL);
 
 	while (!glfwWindowShouldClose(state.glfw_window)) {
 		glfwWaitEvents();

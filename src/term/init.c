@@ -78,13 +78,13 @@ void glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
 
 void glfw_resize_callback(GLFWwindow *window, int width, int height) {
 	term_t *state = glfwGetWindowUserPointer(window);
-	pthread_mutex_lock(&state->global_lock);
+	pthread_mutex_lock(&state->states.lock);
 
-	state->should_resize = true;
-	state->should_render = true;
+	state->states.resize = true;
+	state->states.redraw = true;
 
-	pthread_cond_signal(&state->global_cond);
-	pthread_mutex_unlock(&state->global_lock);
+	pthread_cond_signal(&state->states.cond);
+	pthread_mutex_unlock(&state->states.lock);
 }
 
 void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -106,7 +106,7 @@ void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, in
 
 void glfw_focus_callback(GLFWwindow *window, int focused) {
 	term_t *state = glfwGetWindowUserPointer(window);
-	state->window_active = focused;
+	state->states.focused = focused;
 }
 
 int init_term(term_t *state, config_t *config) {
@@ -187,7 +187,6 @@ int init_term(term_t *state, config_t *config) {
 	glfwSetFramebufferSizeCallback(state->glfw_window, glfw_resize_callback);
 	glfwSetWindowFocusCallback(state->glfw_window, glfw_focus_callback);
 
-	state->window_active = true;
 	state->vterm = vterm_new(state->config->rows, state->config->cols);
 	if (state->vterm == NULL) {
 		fprintf(stderr, "Failed to initialize vterm\n");
@@ -243,7 +242,9 @@ int init_term(term_t *state, config_t *config) {
 		child_state = 1;
 	}
 
-	state->should_render = true;
-	state->should_resize = true;
+	state->states.focused = true;
+	state->states.resize = true;
+	state->states.redraw = true;
+	state->states.active = true;
 	return 1;
 }

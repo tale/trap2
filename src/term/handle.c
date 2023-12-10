@@ -3,7 +3,7 @@
 void *pty_read_thread(void *argp) {
 	term_t *state = (term_t *)argp;
 
-	while (state->threads.active) {
+	while (state->states.active) {
 		// Update the terminal state machine for vterm
 		// Allows us to keep our state machine in sync
 		fd_set readfds;
@@ -32,11 +32,11 @@ void *pty_read_thread(void *argp) {
 			}
 
 			vterm_input_write(state->vterm, line, len);
-			pthread_mutex_lock(&state->global_lock);
+			pthread_mutex_lock(&state->states.lock);
 
-			state->should_render = true;
-			pthread_cond_signal(&state->global_cond);
-			pthread_mutex_unlock(&state->global_lock);
+			state->states.redraw = true;
+			pthread_cond_signal(&state->states.cond);
+			pthread_mutex_unlock(&state->states.lock);
 		}
 	}
 

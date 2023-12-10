@@ -1,3 +1,6 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,3 +28,5 @@ typedef struct {
 int init_config(config_t *config);
 int load_config(config_t *config);
 void destroy_config(config_t *config);
+
+#endif

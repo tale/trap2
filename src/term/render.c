@@ -19,23 +19,28 @@ void *draw_thread(void *argp) {
 		return 0;
 	}
 
-	while (state->threads.active) {
-		pthread_mutex_lock(&state->global_lock);
+	while (state->states.active) {
+		pthread_mutex_lock(&state->states.lock);
 
-		while (!state->should_render) {
-			pthread_cond_wait(&state->global_cond, &state->global_lock);
+		while (!state->states.redraw) {
+			pthread_cond_wait(&state->states.cond, &state->states.lock);
 		}
 
-		pthread_mutex_unlock(&state->global_lock);
+		pthread_mutex_unlock(&state->states.lock);
 
-		if (state->window_active) {
-			state->should_render = false;
+		if (state->states.focused) {
+#ifdef __APPLE__
 			CGLContextObj ctx = CGLGetCurrentContext();
 			CGLLockContext(ctx);
+#endif
 
 			render_term(state);
+			state->states.redraw = false;
 			glfwSwapBuffers(state->glfw_window);
+
+#ifdef __APPLE__
 			CGLUnlockContext(ctx);
+#endif
 		}
 	}
 
@@ -47,11 +52,11 @@ void render_term(term_t *state) {
 	glClearColor(0, 0, 0, state->config->opacity);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (state->should_resize) {
+	if (state->states.resize) {
 		int draw_width, draw_height;
 		glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
 		resize_term(state, draw_width, draw_height);
-		state->should_resize = false;
+		state->states.resize = false;
 	}
 
 	int x_offset = 0;
