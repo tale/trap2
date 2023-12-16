@@ -3,4 +3,4 @@
 #include <stdlib.h>
 
 GLuint load_shaders(const char *vert, const char *frag);
-void attach_shaders(GLuint program, const char *vert, const char *frag);
+GLuint attach_shaders(const char *vert, const char *frag);

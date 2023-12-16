@@ -18,21 +18,20 @@ int init_gl_context(term_t *state) {
 		return 0;
 	}
 
-	state->gl_state.program = glCreateProgram();
-	attach_shaders(
-		state->gl_state.program,
-		"shaders/cell_vert.glsl",
-		"shaders/cell_frag.glsl");
-
-	if (get_gl_error()) {
+	// TODO: Embed shaders into the binary instead of runtime loading
+	GLuint program = attach_shaders("shaders/cell_vert.glsl", "shaders/cell_frag.glsl");
+	if (!program) {
+		log_error("Failed to attach cell shaders");
 		return 0;
 	}
 
+	if (get_gl_error()) {
+		log_error("Got a GL error on the cell shaders");
+		return 0;
+	}
+
+	state->gl_state.program = program;
 	glUseProgram(state->gl_state.program);
-
-	if (get_gl_error()) {
-		return 0;
-	}
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -37,7 +37,13 @@ int get_shader_status(GLuint shader_id) {
 	return result;
 }
 
-void attach_shaders(GLuint program, const char *vert, const char *frag) {
+GLuint attach_shaders(const char *vert, const char *frag) {
+	GLuint program = glCreateProgram();
+	if (program == 0) {
+		log_error("Failed to create shader program");
+		return 0;
+	}
+
 	GLuint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
 	GLchar const *vertex_shader_code = read_file(vert);
 
@@ -46,7 +52,7 @@ void attach_shaders(GLuint program, const char *vert, const char *frag) {
 
 	if (!get_shader_status(vertex_shader_id)) {
 		log_error("Failed to compile vertex shader");
-		return;
+		return 0;
 	}
 
 	GLuint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
@@ -57,7 +63,7 @@ void attach_shaders(GLuint program, const char *vert, const char *frag) {
 
 	if (!get_shader_status(fragment_shader_id)) {
 		log_error("Failed to compile fragment shader");
-		return;
+		return 0;
 	}
 
 	glAttachShader(program, vertex_shader_id);
@@ -66,7 +72,7 @@ void attach_shaders(GLuint program, const char *vert, const char *frag) {
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR) {
 		log_error("Failed to attach shaders: Code %d", err);
-		return;
+		return 0;
 	}
 
 	glLinkProgram(program);
@@ -85,4 +91,5 @@ void attach_shaders(GLuint program, const char *vert, const char *frag) {
 
 	glDeleteShader(vertex_shader_id);
 	glDeleteShader(fragment_shader_id);
+	return program;
 }
