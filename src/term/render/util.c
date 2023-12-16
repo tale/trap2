@@ -4,6 +4,11 @@ int get_gl_error(void) {
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR) {
 		log_error("OpenGL Error Code: %d", err);
+
+		void *callstack[128];
+		int backtrace_data = backtrace(callstack, 128);
+		backtrace_symbols_fd(callstack, backtrace_data, STDERR_FILENO);
+		printf("\n");
 		return 1;
 	}
 
