@@ -30,6 +30,10 @@ int main(void) {
 	pthread_cond_init(&state.states.cond, NULL);
 
 	while (!glfwWindowShouldClose(state.glfw_window)) {
+		if (state.states.reprop) {
+			glfwSetWindowTitle(state.glfw_window, state.title);
+		}
+
 		glfwWaitEvents();
 	}
 

@@ -29,6 +29,7 @@ typedef struct {
 		bool redraw;
 		bool resize;
 		bool active;
+		bool reprop;
 		pthread_mutex_t lock;
 		pthread_cond_t cond;
 	} states;
@@ -36,6 +37,7 @@ typedef struct {
 	config_t *config;
 
 	VTerm *vterm;
+	char *title;
 	VTermScreen *vterm_screen;
 	VTermState *vterm_state;
 	GLFWwindow *glfw_window;

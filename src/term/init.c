@@ -39,6 +39,42 @@ int movecursor(VTermPos pos, VTermPos oldpos, int visible, void *user) {
 }
 
 int settermprop(VTermProp prop, VTermValue *val, void *user) {
+	term_t *state = (term_t *)user;
+
+	switch (prop) {
+	case VTERM_PROP_ALTSCREEN:
+		break;
+
+	case VTERM_PROP_CURSORVISIBLE:
+		break;
+
+	case VTERM_PROP_TITLE:
+		state->title = malloc(val->string.len + 1);
+		memcpy(state->title, val->string.str, val->string.len);
+		state->title[val->string.len] = '\0';
+
+		state->states.reprop = true;
+		break;
+
+	case VTERM_PROP_ICONNAME:
+		break;
+
+	case VTERM_PROP_REVERSE:
+		break;
+
+	case VTERM_PROP_CURSORSHAPE:
+		break;
+
+	case VTERM_PROP_MOUSE:
+		break;
+
+	case VTERM_PROP_CURSORBLINK:
+		break;
+
+	default:
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -59,8 +95,10 @@ int sb_popline(int cols, VTermScreenCell *cells, void *user) {
 VTermScreenCallbacks callbacks = {
 	.movecursor = movecursor,
 	.sb_pushline = sb_pushline,
+	.settermprop = settermprop,
 	.bell = bell,
-	.damage = damage};
+	.damage = damage,
+};
 
 void vterm_output_callback(const char *bytes, size_t len, void *user) {
 	int fd = *(int *)user;
