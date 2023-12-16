@@ -15,10 +15,11 @@
 #include <unistd.h>
 #include <vterm.h>
 
-// Needed for CoreGraphics
-// Context locking is required?
 #ifdef __APPLE__
-#include <OpenGL/OpenGL.h>
+#include <OpenGL/OpenGL.h> // Needed to lock CG context
+#include <util.h>		   // forkpty
+#else
+#include <pty.h>
 #endif
 
 typedef struct {
