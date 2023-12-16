@@ -8,11 +8,11 @@
 #include "log.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>
+#include <execinfo.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <util.h>
 #include <vterm.h>
 
 // Needed for CoreGraphics
