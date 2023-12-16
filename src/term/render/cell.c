@@ -65,6 +65,7 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 	};
 
 	GLuint color_uniform = glGetUniformLocation(state->gl_state.program, "text_color");
+	GLuint bg_color_uniform = glGetUniformLocation(state->gl_state.program, "bg_color");
 
 	glUniform4f(
 		color_uniform,
@@ -72,6 +73,13 @@ void render_cell(term_t *state, int x, int y, int *offset) {
 		color.fg.g / 255.0f,
 		color.fg.b / 255.0f,
 		state->config->opacity);
+
+	glUniform4f(
+		bg_color_uniform,
+		color.bg.r / 255.0f,
+		color.bg.g / 255.0f,
+		color.bg.b / 255.0f,
+		1.0f);
 
 	glActiveTexture(GL_TEXTURE0);
 
