@@ -36,11 +36,19 @@ add_executable(trap2
 	src/platform/mac.m
 )
 
+set_property(TARGET trap2 PROPERTY C_STANDARD 99)
+set_property(TARGET trap2 PROPERTY C_STANDARD_REQUIRED ON)
+set_property(TARGET trap2 PROPERTY C_EXTENSIONS OFF)
+
 # Silence GL deprecations if on macOS
 if(APPLE)
 	target_compile_definitions(trap2 PRIVATE
 		GL_SILENCE_DEPRECATION
 	)
+
+	if (POLICY CMP0025)
+		cmake_policy(SET CMP0025 NEW)
+	endif()
 endif()
 
 target_include_directories(trap2 PRIVATE
