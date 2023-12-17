@@ -10,19 +10,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        c_compiler: [gcc, clang]
-        include:
-          - os: ubuntu-latest
-            c_compiler: gcc
-            cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -51,9 +39,9 @@ jobs:
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCMAKE_CXX_COMPILER=clang++
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_BUILD_TYPE=Release
         -S ${{ github.workspace }}
 
     - name: Build Project
