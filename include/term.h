@@ -1,5 +1,6 @@
 #ifndef TERM_H
 #define TERM_H
+#define _POSIX_C_SOURCE 200809L
 
 #include <GL/glew.h>
 
@@ -8,6 +9,7 @@
 #include "log.h"
 #include "shader.h"
 #include <GLFW/glfw3.h>
+#include <errno.h>
 #include <execinfo.h>
 #include <pthread.h>
 #include <signal.h>
