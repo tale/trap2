@@ -10,17 +10,21 @@ int init_config(config_t *config) {
 	config->dpi = 1;
 	config->opacity = 1.0;
 
-	config->font = strdup("");
+	config->font = malloc(sizeof(char) * 1);
 	if (config->font == NULL) {
 		log_error("Could not allocate config->font");
 		return 0;
 	}
 
-	config->shell = strdup(DEFAULT_SHELL);
+	config->font[0] = '\0';
+
+	config->shell = malloc(sizeof(char) * strlen(DEFAULT_SHELL) + 1);
 	if (config->shell == NULL) {
 		log_error("Could not allocate config->shell");
 		return 0;
 	}
+
+	strncpy(config->shell, DEFAULT_SHELL, strlen(DEFAULT_SHELL) + 1);
 
 	config->argv = malloc(sizeof(char *) * 1);
 	if (config->argv == NULL) {
@@ -135,14 +139,15 @@ int parse_config(config_t *config, FILE *file, char *home) {
 
 			config->argc = 0;
 			while (arg != NULL) {
-				argv[config->argc] = strdup(arg);
+				argv[config->argc] = malloc(sizeof(char) * strlen(arg) + 1);
 				if (argv[config->argc] == NULL) {
 					log_error("Could not allocate argv[%d]", config->argc);
 					return 0;
 				}
 
-				config->argc++;
+				strncpy(argv[config->argc], arg, strlen(arg) + 1);
 				arg = strtok(NULL, " ");
+				config->argc++;
 			}
 
 			config->argv = malloc(sizeof(char *) * (config->argc + 1));
@@ -160,12 +165,13 @@ int parse_config(config_t *config, FILE *file, char *home) {
 				free(config->shell);
 			}
 
-			config->shell = strdup(value);
+			config->shell = malloc(sizeof(char) * strlen(value) + 1);
 			if (config->shell == NULL) {
 				log_error("Could not allocate config->shell");
 				return 0;
 			}
 
+			strncpy(config->shell, value, strlen(value) + 1);
 			continue;
 		}
 
@@ -180,12 +186,13 @@ int parse_config(config_t *config, FILE *file, char *home) {
 				free(config->font);
 			}
 
-			config->font = strdup(value);
+			config->font = malloc(sizeof(char) * strlen(value) + 1);
 			if (config->font == NULL) {
 				log_error("Could not allocate config->font");
 				return 0;
 			}
 
+			strncpy(config->font, value, strlen(value) + 1);
 			continue;
 		}
 
