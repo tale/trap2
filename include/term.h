@@ -1,6 +1,6 @@
 #ifndef TERM_H
 #define TERM_H
-#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 200112L
 
 #include <GL/glew.h>
 
