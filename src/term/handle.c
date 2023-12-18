@@ -18,7 +18,7 @@ void *pty_read_thread(void *argp) {
 		if (select(state->child_fd + 1, &readfds, NULL, NULL, &timeout) > 0) {
 			// Page size is the most efficient buffer size in this case
 			// It doesn't make sense to read more than a page at a time
-			size_t page_size = getpagesize();
+			size_t page_size = sysconf(_SC_PAGESIZE);
 			char line[page_size];
 
 			size_t len = read(state->child_fd, line, sizeof(line));
