@@ -8,7 +8,6 @@ int get_gl_error(void) {
 		void *callstack[128];
 		int backtrace_data = backtrace(callstack, 128);
 		backtrace_symbols_fd(callstack, backtrace_data, STDERR_FILENO);
-		printf("\n");
 		return 1;
 	}
 
@@ -61,6 +60,9 @@ void update_projection(term_t *state) {
 	GLuint projection_uniform = glGetUniformLocation(state->gl_state.program, "projection");
 	glUniformMatrix4fv(projection_uniform, 1, GL_FALSE, matrix);
 
-	get_gl_error();
 	state->config->dpi = draw_width / win_width;
+	if (get_gl_error()) {
+		log_error("Failed to update projection");
+		return;
+	}
 }
