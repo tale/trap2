@@ -10,6 +10,8 @@ This is very much a work in progress, and I have a lot of ideas for the future:
 
 - [ ] Integrate clipboard support
 - [ ] Better testing harnesses
+- [ ] Switch to Dawn (Google's WebGPU implementation) for rendering
+- [ ] Determine the possibility of using native windowing APIs instead of GLFW
 
 ### Rationale
 The development of this terminal emulator ties closely to my CS367 Systems Engineering class at George Mason University.
