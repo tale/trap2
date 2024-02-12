@@ -1,3 +1,4 @@
+#include "mac.h"
 #include "term.h"
 
 FT_UInt32 get_char_code_point(int values[]) {
@@ -80,8 +81,17 @@ int init_font(font_t *font, char *font_file, float size) {
 		return 0;
 	}
 
-	// Load unnaturally large font in order to get the largest possible glyph
-	error = FT_Set_Char_Size(font->face, 0, (int)(size * 64), 300, 300);
+	// Pixel to 26.6 fixed point is just size * 64
+	int size_26_6 = size * 64;
+
+	// Assume 96 DPI if we can't get the actual DPI
+	float hor_dpi = 96, ver_dpi = 96;
+
+#ifdef __APPLE__
+	getScreenDPI(&hor_dpi, &ver_dpi);
+#endif
+
+	error = FT_Set_Char_Size(font->face, size_26_6, size_26_6, hor_dpi, ver_dpi);
 	if (error) {
 		fprintf(stderr, "FT_Set_Char_Size Error: %s\n", FT_Error_String(error));
 		return 0;
