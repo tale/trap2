@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.19) # 3.19 introduced Apple Silicon support
 include(FetchContent) # Enable FetchContent to clone dependencies
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 project(
 	trap2
 	VERSION 1.0.0 
