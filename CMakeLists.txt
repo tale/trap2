@@ -15,7 +15,7 @@ if(NOT PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 	file(GENERATE OUTPUT .gitignore CONTENT "*")
 endif()
 
-include(cmake/dawn.cmake)
+include(cmake/glfw.cmake)
 include(cmake/glew.cmake)
 include(cmake/vterm.cmake)
 include(cmake/freetype.cmake)
@@ -58,11 +58,9 @@ target_include_directories(trap2 PRIVATE
 	${vterm_SOURCE_DIR}/include
 	${glew_SOURCE_DIR}/include
 	${glfw_SOURCE_DIR}/include
-	${dawn_SOURCE_DIR}/include
 )
 
 target_link_libraries(trap2 PRIVATE
-	webgpu
 	glfw
 	libglew_static
 	freetype
