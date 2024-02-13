@@ -1,3 +1,4 @@
+#include "mac.h"
 #include "term.h"
 
 int get_gl_error(void) {
@@ -60,7 +61,25 @@ void update_projection(term_t *state) {
 	GLuint projection_uniform = glGetUniformLocation(state->gl_state.program, "projection");
 	glUniformMatrix4fv(projection_uniform, 1, GL_FALSE, matrix);
 
-	state->config->dpi = draw_width / win_width;
+	int new_dpi = draw_width / win_width;
+	if (new_dpi != state->config->dpi) {
+		bust_glyph_cache(&state->font);
+		int size = state->config->font_size;
+
+		// Pixel to 26.6 fixed point is just size * 64
+		int size_26_6 = size * 64;
+
+		// Assume 96 DPI if we can't get the actual DPI
+		float hor_dpi = 96, ver_dpi = 96;
+
+#ifdef __APPLE__
+		getScreenDPI(&hor_dpi, &ver_dpi);
+#endif
+
+		FT_Set_Char_Size(state->font.face, size_26_6, size_26_6, hor_dpi, ver_dpi);
+		state->config->dpi = new_dpi;
+	}
+
 	if (get_gl_error()) {
 		log_error("Failed to update projection");
 		return;

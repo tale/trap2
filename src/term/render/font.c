@@ -64,6 +64,17 @@ void load_cache(font_t *font, FT_UInt32 char_code) {
 	font->cache[char_code] = glyph;
 }
 
+int bust_glyph_cache(font_t *font) {
+	for (int i = 0; i < MAX_CODE_POINT; i++) {
+		if (font->cache[i].texture != 0) {
+			glDeleteTextures(1, &font->cache[i].texture);
+			font->cache[i].texture = 0;
+		}
+	}
+
+	return 0;
+}
+
 // Returns 0 on failure so that we can do if (!init_font()) {}
 int init_font(font_t *font, char *font_file, float size) {
 	log_info("Loading font: %s", font_file);

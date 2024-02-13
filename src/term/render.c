@@ -13,7 +13,7 @@ void *draw_thread(void *argp) {
 		return 0;
 	}
 
-	int font_size = state->config->font_size / state->config->dpi;
+	int font_size = state->config->font_size * state->config->dpi;
 	if (!init_font(&state->font, state->config->font, font_size)) {
 		log_error("Failed to initialize font");
 		return 0;
