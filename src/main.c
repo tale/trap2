@@ -18,6 +18,14 @@ int main(void) {
 		return -1;
 	}
 
+	state.parser = parser_create(&config);
+	if (state.parser == NULL) {
+		log_error("Failed to initialize parser");
+		return -1;
+	}
+
+	state.states.active = true;
+
 	// Yay we are doing multithreading now to make stuff fast
 	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
 	pthread_detach(state.threads.pty_thread);

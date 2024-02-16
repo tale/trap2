@@ -7,6 +7,7 @@
 #include "config.h"
 #include "font.h"
 #include "log.h"
+#include "parser.h"
 #include "shader.h"
 #include "text.h"
 #include <GLFW/glfw3.h>
@@ -19,7 +20,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <vterm.h>
 
 #ifdef __APPLE__
 #include <util.h> // forkpty
@@ -38,17 +38,8 @@ typedef struct {
 
 	config_t *config;
 
-	VTerm *vterm;
 	char *title;
-	VTermScreen *vterm_screen;
-	VTermState *vterm_state;
 	GLFWwindow *glfw_window;
-
-	struct {
-		int x;
-		int y;
-		bool active;
-	} cursor;
 
 	struct {
 		pthread_t draw_thread;
@@ -57,20 +48,16 @@ typedef struct {
 
 	font_t font;
 
-	pid_t child_pty;
-	int child_fd;
-
 	struct {
 		GLuint program;
 		GLuint vao;
 		GLuint vbo;
 		GLuint ebo;
 		text_atlas_t *atlas;
-		VTermRect scissor;
-		VTermRect damage;
 	} gl_state;
 
 	cache_ht_t *glyph_cache;
+	parser_t *parser;
 } term_t;
 
 #define MAX_BATCH 65536
@@ -110,8 +97,7 @@ typedef struct {
 	GLuint count;
 } batch_t;
 
-// Global to work with signal handler
-static int child_state;
+GLFWwindow *window;
 
 int init_term(term_t *state, config_t *config);
 void destroy_term(term_t *state);

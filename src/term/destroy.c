@@ -2,8 +2,7 @@
 
 void destroy_term(term_t *state) {
 	state->states.active = false;
-	kill(state->child_pty, SIGTERM);
-	vterm_free(state->vterm);
+	parser_destroy(state->parser);
 
 	FT_Done_Face(state->font.face);
 	FT_Done_FreeType(state->font.library);

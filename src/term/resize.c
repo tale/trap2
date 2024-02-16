@@ -18,12 +18,12 @@ void resize_term(term_t *state, int width, int height) {
 	if (cols != state->config->cols || rows != state->config->rows) {
 		state->config->rows = rows;
 		state->config->cols = cols;
-		vterm_set_size(state->vterm, rows, cols);
-		vterm_screen_flush_damage(state->vterm_screen);
+		vterm_set_size(state->parser->vt, rows, cols);
+		vterm_screen_flush_damage(state->parser->vt_screen);
 
 		struct winsize ws = {0};
 		ws.ws_row = rows;
 		ws.ws_col = cols;
-		ioctl(state->child_fd, TIOCSWINSZ, &ws);
+		ioctl(state->parser->child_fd, TIOCSWINSZ, &ws);
 	}
 }

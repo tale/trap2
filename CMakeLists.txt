@@ -30,13 +30,16 @@ add_executable(trap2
 	src/term/handle.c
 	src/term/render.c
 	src/term/resize.c
-	src/term/render/cell.c
 	src/term/render/font.c
 	src/term/render/main.c
 	src/term/render/util.c
 	src/text/atlas.c
 	src/text/cache.c
 	src/text/ft_raster.c
+	src/parser/init.c
+	src/parser/destroy.c
+	src/parser/sig_action.c
+	src/parser/vt_callbacks.c
 	src/platform/mac.m
 )
 
