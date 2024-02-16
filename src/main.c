@@ -19,25 +19,41 @@ int main(void) {
 	}
 
 	// Yay we are doing multithreading now to make stuff fast
-	// Note: Needs to be called after init_term because of context
 	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
-	pthread_create(&state.threads.draw_thread, NULL, draw_thread, &state);
 
 	pthread_detach(state.threads.pty_thread);
-	pthread_detach(state.threads.draw_thread);
 
-	pthread_mutex_init(&state.states.lock, NULL);
-	pthread_cond_init(&state.states.cond, NULL);
+	if (!init_gl_context(&state)) {
+		log_error("Failed to initialize OpenGL context");
+		return 0;
+	}
+
+	if (get_gl_error()) {
+		log_error("Failed to initialize OpenGL context 2");
+		return 0;
+	}
+
+	int font_size = state.config->font_size * state.config->dpi;
+	if (!init_font(&state.font, state.config->font, font_size)) {
+		log_error("Failed to initialize font");
+		return 0;
+	}
+
+	glfwSwapInterval(1);
 
 	while (!glfwWindowShouldClose(state.glfw_window)) {
 		if (state.states.reprop) {
 			glfwSetWindowTitle(state.glfw_window, state.title);
 		}
 
+		render_term(&state);
+		glfwSwapBuffers(state.glfw_window);
+
 		glfwWaitEvents();
 	}
 
 	destroy_term(&state);
 	destroy_config(&config);
+	destroy_gl_context(&state);
 	return 0;
 }

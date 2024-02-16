@@ -1,63 +1,15 @@
 #include "term.h"
 
-void *draw_thread(void *argp) {
-	term_t *state = (term_t *)argp;
-
-	if (!init_gl_context(state)) {
-		log_error("Failed to initialize OpenGL context");
-		return 0;
-	}
-
-	if (get_gl_error()) {
-		log_error("Failed to initialize OpenGL context 2");
-		return 0;
-	}
-
-	int font_size = state->config->font_size * state->config->dpi;
-	if (!init_font(&state->font, state->config->font, font_size)) {
-		log_error("Failed to initialize font");
-		return 0;
-	}
-
-	while (state->states.active) {
-		pthread_mutex_lock(&state->states.lock);
-
-		while (!state->states.redraw) {
-			pthread_cond_wait(&state->states.cond, &state->states.lock);
-		}
-
-		pthread_mutex_unlock(&state->states.lock);
-
-		if (state->states.focused) {
-#ifdef __APPLE__
-			CGLContextObj ctx = CGLGetCurrentContext();
-			CGLLockContext(ctx);
-#endif
-
-			render_term(state);
-			state->states.redraw = false;
-			glfwSwapBuffers(state->glfw_window);
-
-#ifdef __APPLE__
-			CGLUnlockContext(ctx);
-#endif
-		}
-	}
-
-	destroy_gl_context(state);
-	pthread_exit(NULL);
-}
-
 void render_term(term_t *state) {
 	glClearColor(0, 0, 0, state->config->opacity);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (state->states.resize) {
-		int draw_width, draw_height;
-		glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
-		resize_term(state, draw_width, draw_height);
-		state->states.resize = false;
-	}
+	// if (state->states.resize) {
+	// 	int draw_width, draw_height;
+	// 	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
+	// 	resize_term(state, draw_width, draw_height);
+	// 	state->states.resize = false;
+	// }
 
 	int x_offset = 0;
 

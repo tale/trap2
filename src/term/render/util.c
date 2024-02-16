@@ -17,8 +17,10 @@ int get_gl_error(void) {
 
 void update_projection(term_t *state) {
 	// Make the OpenGL coordinate system orthagonal from top-left
-	int draw_width, draw_height, win_width, win_height;
-	glfwGetFramebufferSize(state->glfw_window, &draw_width, &draw_height);
+	int draw_width = state->config->width;
+	int draw_height = state->config->height;
+
+	int win_width, win_height;
 	glfwGetWindowSize(state->glfw_window, &win_width, &win_height);
 
 	float left = 0.0f;

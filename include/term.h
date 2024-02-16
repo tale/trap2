@@ -21,8 +21,7 @@
 #include <vterm.h>
 
 #ifdef __APPLE__
-#include <OpenGL/OpenGL.h> // Needed to lock CG context
-#include <util.h>		   // forkpty
+#include <util.h> // forkpty
 #else
 #include <pty.h>
 #endif
@@ -32,12 +31,8 @@ typedef struct {
 	// It's very important for synchronization
 	struct {
 		bool focused;
-		bool redraw;
-		bool resize;
 		bool active;
 		bool reprop;
-		pthread_mutex_t lock;
-		pthread_cond_t cond;
 	} states;
 
 	config_t *config;
@@ -79,7 +74,6 @@ void destroy_term(term_t *state);
 void render_term(term_t *state);
 void resize_term(term_t *state, int width, int height);
 void *pty_read_thread(void *argp);
-void *draw_thread(void *argp);
 void handle_key(term_t *state, int key, int mods);
 
 // Rendering functions

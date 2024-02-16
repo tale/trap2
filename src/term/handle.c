@@ -32,11 +32,6 @@ void *pty_read_thread(void *argp) {
 			}
 
 			vterm_input_write(state->vterm, line, len);
-			pthread_mutex_lock(&state->states.lock);
-
-			state->states.redraw = true;
-			pthread_cond_signal(&state->states.cond);
-			pthread_mutex_unlock(&state->states.lock);
 		}
 	}
 
