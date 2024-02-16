@@ -14,7 +14,6 @@ void resize_term(term_t *state, int width, int height) {
 	int cols = (state->config->width / mono_width);
 	int rows = (state->config->height / mono_height);
 
-	// TODO: Is there a way to stop infinite calls to resize and reduce it?
 	if (cols != state->config->cols || rows != state->config->rows) {
 		state->config->rows = rows;
 		state->config->cols = cols;

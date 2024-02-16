@@ -2,7 +2,6 @@
 
 void sig_action(int sig_type) {
 	term_t *state = glfwGetWindowUserPointer(window);
-	child_status = CHILD_STATUS_EXITED;
 
 	int status;
 	waitpid(-1, &status, WNOHANG);

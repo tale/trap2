@@ -32,7 +32,6 @@ typedef struct {
 	// It's very important for synchronization
 	struct {
 		bool focused;
-		bool active;
 		bool reprop;
 	} states;
 
@@ -40,11 +39,6 @@ typedef struct {
 
 	char *title;
 	GLFWwindow *glfw_window;
-
-	struct {
-		pthread_t draw_thread;
-		pthread_t pty_thread;
-	} threads;
 
 	font_t font;
 

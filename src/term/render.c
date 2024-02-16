@@ -54,7 +54,7 @@ void render_term(term_t *state) {
 			VTermScreenCell vt_cell;
 			VTermPos pos = {.row = y, .col = x};
 
-			vterm_screen_get_cell(state->vterm_screen, pos, &vt_cell);
+			vterm_screen_get_cell(state->parser->vt_screen, pos, &vt_cell);
 			uint32_t char_code = vt_cell.chars[0];
 
 			if (char_code == 0) {
@@ -68,8 +68,8 @@ void render_term(term_t *state) {
 
 			atlas_add_glyph(state->gl_state.atlas, rast, &uv);
 
-			vterm_state_convert_color_to_rgb(state->vterm_state, &vt_cell.fg);
-			vterm_state_convert_color_to_rgb(state->vterm_state, &vt_cell.bg);
+			vterm_state_convert_color_to_rgb(state->parser->vt_state, &vt_cell.fg);
+			vterm_state_convert_color_to_rgb(state->parser->vt_state, &vt_cell.bg);
 
 			uint8_t fg_red = vt_cell.fg.rgb.red;
 			uint8_t fg_green = vt_cell.fg.rgb.green;

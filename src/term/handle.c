@@ -1,43 +1,5 @@
 #include "term.h"
 
-void *pty_read_thread(void *argp) {
-	term_t *state = (term_t *)argp;
-
-	while (state->states.active) {
-		// Update the terminal state machine for vterm
-		// Allows us to keep our state machine in sync
-		fd_set readfds;
-		struct timeval timeout = {0};
-
-		FD_ZERO(&readfds);
-		FD_SET(state->parser->child_fd, &readfds);
-
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 1000;
-
-		if (select(state->parser->child_fd + 1, &readfds, NULL, NULL, &timeout) > 0) {
-			// Page size is the most efficient buffer size in this case
-			// It doesn't make sense to read more than a page at a time
-			size_t page_size = sysconf(_SC_PAGESIZE);
-			char line[page_size];
-
-			size_t len = read(state->parser->child_fd, line, sizeof(line));
-			if (len < 0) {
-				log_error("Failed to read from pty: %s", strerror(errno));
-				break;
-			}
-
-			if (len == 0) {
-				break;
-			}
-
-			vterm_input_write(state->parser->vt, line, len);
-		}
-	}
-
-	pthread_exit(NULL);
-}
-
 // These only fire on keydown because they are important for escape sequences
 void handle_key(term_t *state, int key, int mods) {
 	switch (key) {

@@ -37,6 +37,7 @@ add_executable(trap2
 	src/text/cache.c
 	src/text/ft_raster.c
 	src/parser/init.c
+	src/parser/child_read.c
 	src/parser/destroy.c
 	src/parser/sig_action.c
 	src/parser/vt_callbacks.c

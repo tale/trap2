@@ -1,7 +1,6 @@
 #include "term.h"
 
 void destroy_term(term_t *state) {
-	state->states.active = false;
 	parser_destroy(state->parser);
 
 	FT_Done_Face(state->font.face);

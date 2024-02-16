@@ -24,12 +24,6 @@ int main(void) {
 		return -1;
 	}
 
-	state.states.active = true;
-
-	// Yay we are doing multithreading now to make stuff fast
-	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
-	pthread_detach(state.threads.pty_thread);
-
 	if (!init_gl_context(&state)) {
 		log_error("Failed to initialize OpenGL context");
 		return 0;

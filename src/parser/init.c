@@ -20,6 +20,10 @@ parser_t *parser_create(config_t *config) {
 		return NULL;
 	}
 
+	pthread_t pty_thread;
+	log_info("Child forkpty() pid: %d", parser->child_pid);
+	pthread_create(&pty_thread, NULL, child_read, parser);
+	pthread_detach(pty_thread);
 	return parser;
 }
 
@@ -73,8 +77,8 @@ int vt_create(parser_t *parser, int rows, int cols) {
 }
 
 int child_create(parser_t *parser, char *shell, int argc, char **argv) {
-	parser->child_pid = forkpty(&parser->child_fd, NULL, NULL, NULL);
-	if (parser->child_pid < 0) {
+	pid_t pid = forkpty(&parser->child_fd, NULL, NULL, NULL);
+	if (pid < 0) {
 		log_error("Failed to forkpty");
 		return 0;
 	}
@@ -84,20 +88,24 @@ int child_create(parser_t *parser, char *shell, int argc, char **argv) {
 		exec_argv[i + 1] = argv[i];
 	}
 
-	exec_argv[argc + 1] = NULL;
-	if (parser->child_pid == 0) {
+	// Get rid of FD_CLOEXEC
+	fcntl(parser->child_fd, F_SETFD, 0);
+
+	if (pid == 0) {
 		setenv("TERM", "xterm-256color", 1);
 		setenv("COLORTERM", "truecolor", 1);
 		execv(shell, exec_argv);
-		return 1; // Never hit anyways
+	} else {
+		struct sigaction sa;
+		sa.sa_handler = sig_action;
+		sa.sa_flags = 0;
+
+		sigemptyset(&sa.sa_mask);
+		sigaction(SIGCHLD, &sa, NULL);
+		parser->child_alive = 1;
+		parser->child_pid = pid;
+		printf("pid: %d\n", pid);
 	}
 
-	struct sigaction sa;
-	sa.sa_handler = sig_action;
-	sa.sa_flags = 0;
-
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGCHLD, &sa, NULL);
-	child_status = CHILD_STATUS_RUNNING;
 	return 1;
 }
