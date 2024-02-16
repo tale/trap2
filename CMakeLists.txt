@@ -40,6 +40,7 @@ add_executable(trap2
 set_property(TARGET trap2 PROPERTY C_STANDARD 99)
 set_property(TARGET trap2 PROPERTY C_STANDARD_REQUIRED ON)
 set_property(TARGET trap2 PROPERTY C_EXTENSIONS OFF)
+configure_file(Info.plist Info.plist @ONLY)
 
 # Silence GL deprecations if on macOS
 if(APPLE)
