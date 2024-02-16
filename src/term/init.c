@@ -135,11 +135,11 @@ void glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
 }
 
 void glfw_resize_callback(GLFWwindow *window, int width, int height) {
-	// int draw_width, draw_height;
-	// glfwGetFramebufferSize(window, &draw_width, &draw_height);
-	//
-	// term_t *state = glfwGetWindowUserPointer(window);
-	// resize_term(state, draw_width, draw_height);
+	int draw_width, draw_height;
+	glfwGetWindowSize(window, &draw_width, &draw_height);
+
+	term_t *state = glfwGetWindowUserPointer(window);
+	resize_term(state, draw_width, draw_height);
 	// render_term(state);
 	// glfwSwapBuffers(window);
 }

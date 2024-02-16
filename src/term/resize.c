@@ -4,7 +4,6 @@ void resize_term(term_t *state, int width, int height) {
 	state->config->width = width;
 	state->config->height = height;
 	update_projection(state);
-	glScissor(0, 0, width, height);
 
 	int ascent = state->font.face->size->metrics.ascender >> 6;
 	int descent = state->font.face->size->metrics.descender >> 6;
@@ -17,7 +16,6 @@ void resize_term(term_t *state, int width, int height) {
 
 	// TODO: Is there a way to stop infinite calls to resize and reduce it?
 	if (cols != state->config->cols || rows != state->config->rows) {
-
 		state->config->rows = rows;
 		state->config->cols = cols;
 		vterm_set_size(state->vterm, rows, cols);
