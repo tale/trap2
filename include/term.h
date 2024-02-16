@@ -63,6 +63,8 @@ typedef struct {
 		GLuint program;
 		GLuint vao;
 		GLuint vbo;
+		VTermRect scissor;
+		VTermRect damage;
 	} gl_state;
 } term_t;
 

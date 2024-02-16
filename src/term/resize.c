@@ -4,6 +4,7 @@ void resize_term(term_t *state, int width, int height) {
 	state->config->width = width;
 	state->config->height = height;
 	update_projection(state);
+	glScissor(0, 0, width, height);
 
 	int ascent = state->font.face->size->metrics.ascender >> 6;
 	int descent = state->font.face->size->metrics.descender >> 6;

@@ -16,8 +16,27 @@ void sig_handler(int sig_type) {
 }
 
 int damage(VTermRect rect, void *user) {
-	// printf("damage: [%d, %d, %d, %d]\n", rect.start_col,
-	//			rect.start_row, rect.end_col, rect.end_row);
+	term_t *state = (term_t *)user;
+	state->gl_state.damage = rect;
+
+	// The idea is to append to the scissor, so that redraw is minimized
+	// If the bounds of damage are past the scissor, increase scissor size
+	if (rect.start_col < state->gl_state.scissor.start_col) {
+		state->gl_state.scissor.start_col = rect.start_col;
+	}
+
+	if (rect.start_row < state->gl_state.scissor.start_row) {
+		state->gl_state.scissor.start_row = rect.start_row;
+	}
+
+	if (rect.end_col > state->gl_state.scissor.end_col) {
+		state->gl_state.scissor.end_col = rect.end_col;
+	}
+
+	if (rect.end_row > state->gl_state.scissor.end_row) {
+		state->gl_state.scissor.end_row = rect.end_row;
+	}
+
 	return 1;
 }
 

@@ -3,7 +3,7 @@
 // Called inside of the thread as a bootstrap
 int init_gl_context(term_t *state) {
 	glfwMakeContextCurrent(state->glfw_window);
-	glfwSwapInterval(0);
+	glfwSwapInterval(1);
 
 	log_info("OpenGL Version: %s", glGetString(GL_VERSION));
 	log_info("OpenGL Renderer: %s", glGetString(GL_RENDERER));
