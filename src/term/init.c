@@ -37,6 +37,7 @@ int damage(VTermRect rect, void *user) {
 		state->gl_state.scissor.end_row = rect.end_row;
 	}
 
+	glfwPostEmptyEvent();
 	return 1;
 }
 
@@ -134,13 +135,13 @@ void glfw_char_callback(GLFWwindow *window, unsigned int codepoint) {
 }
 
 void glfw_resize_callback(GLFWwindow *window, int width, int height) {
-	int draw_width, draw_height;
-	glfwGetFramebufferSize(window, &draw_width, &draw_height);
-
-	term_t *state = glfwGetWindowUserPointer(window);
-	resize_term(state, draw_width, draw_height);
-	render_term(state);
-	glfwSwapBuffers(window);
+	// int draw_width, draw_height;
+	// glfwGetFramebufferSize(window, &draw_width, &draw_height);
+	//
+	// term_t *state = glfwGetWindowUserPointer(window);
+	// resize_term(state, draw_width, draw_height);
+	// render_term(state);
+	// glfwSwapBuffers(window);
 }
 
 void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -165,6 +166,12 @@ void glfw_focus_callback(GLFWwindow *window, int focused) {
 	state->states.focused = focused;
 }
 
+void glfw_window_refresh_callback(GLFWwindow *window) {
+	term_t *state = glfwGetWindowUserPointer(window);
+	render_term(state);
+	glfwSwapBuffers(window);
+}
+
 int init_term(term_t *state, config_t *config) {
 	if (config == NULL) {
 		fprintf(stderr, "Config is NULL\n");
@@ -179,40 +186,21 @@ int init_term(term_t *state, config_t *config) {
 	}
 
 	log_info("Loaded GLFW: %s", glfwGetVersionString());
-	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	if (mode == NULL) {
-		fprintf(stderr, "Failed to get video mode\n");
-		glfwTerminate();
-		return 0;
-	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_DEPTH_BITS, 24);
-	glfwWindowHint(GLFW_STENCIL_BITS, 8);
-	glfwWindowHint(GLFW_ALPHA_BITS, 8);
-	glfwWindowHint(GLFW_DOUBLEBUFFER, 1);
-	// glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 	glfwWindowHint(GL_FRAMEBUFFER_SRGB, GLFW_TRUE);
+	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+	glfwWindowHint(GLFW_DEPTH_BITS, 0);
+	glfwWindowHint(GLFW_STENCIL_BITS, 0);
+	glfwWindowHint(GLFW_ALPHA_BITS, 2);
 
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
-	// glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
-
-	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
-	glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GLFW_TRUE);
-
-	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-
-	// Higher refresh rates allow overbuffered rendering
-	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate * 2);
+	glfwWindowHint(GLFW_RED_BITS, 10);
+	glfwWindowHint(GLFW_GREEN_BITS, 10);
+	glfwWindowHint(GLFW_BLUE_BITS, 10);
 
 	state->glfw_window = glfwCreateWindow(
 		config->width,
@@ -242,6 +230,7 @@ int init_term(term_t *state, config_t *config) {
 	glfwSetKeyCallback(state->glfw_window, glfw_key_callback);
 	glfwSetFramebufferSizeCallback(state->glfw_window, glfw_resize_callback);
 	glfwSetWindowFocusCallback(state->glfw_window, glfw_focus_callback);
+	glfwSetWindowRefreshCallback(state->glfw_window, glfw_window_refresh_callback);
 
 	state->vterm = vterm_new(state->config->rows, state->config->cols);
 	if (state->vterm == NULL) {

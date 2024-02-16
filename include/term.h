@@ -8,6 +8,7 @@
 #include "font.h"
 #include "log.h"
 #include "shader.h"
+#include "text.h"
 #include <GLFW/glfw3.h>
 #include <errno.h>
 #include <execinfo.h>
@@ -63,10 +64,49 @@ typedef struct {
 		GLuint program;
 		GLuint vao;
 		GLuint vbo;
+		GLuint ebo;
+		text_atlas_t *atlas;
 		VTermRect scissor;
 		VTermRect damage;
 	} gl_state;
 } term_t;
+
+#define MAX_BATCH 65536
+#define MAX_ATLAS 1024
+
+typedef struct {
+	uint16_t col;
+	uint16_t row;
+
+	// Glyph offset
+	int16_t left;
+	int16_t top;
+
+	// Glyph size
+	int16_t width;
+	int16_t height;
+
+	GLfloat uv_left;
+	GLfloat uv_bottom;
+
+	GLfloat uv_width;
+	GLfloat uv_height;
+
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a; // UNUSED
+
+	uint8_t bg_r;
+	uint8_t bg_g;
+	uint8_t bg_b;
+	uint8_t bg_a; // UNUSED
+} cell_t;
+
+typedef struct {
+	cell_t cells[MAX_BATCH];
+	GLuint count;
+} batch_t;
 
 // Global to work with signal handler
 static int child_state;

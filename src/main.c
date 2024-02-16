@@ -20,7 +20,6 @@ int main(void) {
 
 	// Yay we are doing multithreading now to make stuff fast
 	pthread_create(&state.threads.pty_thread, NULL, pty_read_thread, &state);
-
 	pthread_detach(state.threads.pty_thread);
 
 	if (!init_gl_context(&state)) {
@@ -39,16 +38,13 @@ int main(void) {
 		return 0;
 	}
 
-	glfwSwapInterval(1);
-
 	while (!glfwWindowShouldClose(state.glfw_window)) {
 		if (state.states.reprop) {
-			glfwSetWindowTitle(state.glfw_window, state.title);
+			// glfwSetWindowTitle(state.glfw_window, state.title);
 		}
 
 		render_term(&state);
 		glfwSwapBuffers(state.glfw_window);
-
 		glfwWaitEvents();
 	}
 
