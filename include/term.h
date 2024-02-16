@@ -69,6 +69,8 @@ typedef struct {
 		VTermRect scissor;
 		VTermRect damage;
 	} gl_state;
+
+	cache_ht_t *glyph_cache;
 } term_t;
 
 #define MAX_BATCH 65536

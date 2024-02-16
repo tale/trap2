@@ -35,6 +35,7 @@ add_executable(trap2
 	src/term/render/main.c
 	src/term/render/util.c
 	src/text/atlas.c
+	src/text/cache.c
 	src/text/ft_raster.c
 	src/platform/mac.m
 )

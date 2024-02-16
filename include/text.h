@@ -43,4 +43,30 @@ text_atlas_t *atlas_create(int32_t size);
 void atlas_destroy(text_atlas_t *atlas);
 atlas_status_t atlas_add_glyph(text_atlas_t *atlas, rast_glyph_t *glyph, uv_t *uv);
 
-rast_glyph_t rast_glyph_ft(FT_Face face, FT_UInt char_code);
+rast_glyph_t *rast_glyph_ft(FT_Face face, FT_UInt char_code);
+
+typedef struct {
+	uint32_t char_code;
+	rast_glyph_t *glyph;
+} cache_entry_t;
+
+typedef struct {
+	cache_entry_t **table;
+	int32_t size;
+	int32_t count;
+} cache_ht_t;
+
+#define CACHE_HT_SIZE 65536
+
+cache_ht_t *cache_ht_create(void);
+cache_entry_t *cache_entry_create(rast_glyph_t *glyph);
+
+void cache_ht_destroy(cache_ht_t *ht);
+void cache_entry_destroy(cache_entry_t *entry);
+
+int cache_ht_insert(cache_ht_t *ht, rast_glyph_t *glyph);
+rast_glyph_t *cache_ht_lookup(cache_ht_t *ht, uint32_t char_code);
+rast_glyph_t *load_glyph(cache_ht_t *ht, FT_Face face, uint32_t char_code);
+
+// TODO: Create a struct with a bunch of pointers to the correct functions
+// On start, set the functions based on the rasterizer (CoreText, FreeType, etc)

@@ -289,5 +289,6 @@ int init_term(term_t *state, config_t *config) {
 
 	state->states.focused = true;
 	state->states.active = true;
+	state->glyph_cache = cache_ht_create();
 	return 1;
 }

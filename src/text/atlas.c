@@ -1,4 +1,4 @@
-#include <text.h>
+#include "text.h"
 
 // In order to make atlases easy to work with, they're modeled after GL.
 // We start packing from the bottom left and work our way to width and height.

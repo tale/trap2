@@ -61,8 +61,12 @@ void render_term(term_t *state) {
 				continue;
 			}
 
-			rast_glyph_t rast = rast_glyph_ft(state->font.face, char_code);
-			atlas_add_glyph(state->gl_state.atlas, &rast, &uv);
+			rast_glyph_t *rast = load_glyph(
+				state->glyph_cache,
+				state->font.face,
+				char_code);
+
+			atlas_add_glyph(state->gl_state.atlas, rast, &uv);
 
 			vterm_state_convert_color_to_rgb(state->vterm_state, &vt_cell.fg);
 			vterm_state_convert_color_to_rgb(state->vterm_state, &vt_cell.bg);
@@ -93,11 +97,11 @@ void render_term(term_t *state) {
 				.col = x,
 				.row = y,
 
-				.top = rast.top,
-				.left = rast.left,
+				.top = rast->top,
+				.left = rast->left,
 
-				.width = rast.width,
-				.height = rast.height,
+				.width = rast->width,
+				.height = rast->height,
 
 				.uv_bottom = uv.bottom,
 				.uv_left = uv.left,
